@@ -73,7 +73,7 @@ But that's only for adding and manually setting error messages, which isn't usef
 
 There are a couple of reflected attributes that is only an alias for the underlaying model, for convenience:
 
-* {{ value }} is the same as {{ model.$viewValue }}
+* `{{ value }}` is the same as `{{ model.$viewValue }}`
 
 #### Directive
 
