@@ -11,7 +11,9 @@ How is it better than `ngMessage` / `ngMessages`? Or plain old `ng-switch-when` 
 
 Because you need to write the same boring HTML markup over and over, and you need to cluttering your scope and controllers with useless state error messages. Plus, you are usually stuck with `modelController.$error` / `myForm.myModel.$error.required` / `myForm.$error.require[0].$error` (srsly wtf) boolean states.
 
-Take this for example:
+And have you ever had to return validation from the server after a socket/ajax call and show it in your form? Tired of no way of assigning errors dynamically? Does your scope variables look like a mess with state errors?
+
+Take this _superb_ for example:
 
 ```html
 <form name="userForm">
@@ -34,13 +36,13 @@ Take this for example:
 </form>
 ```
 
-![EWW NOPE NOPE. Burn it with fire.](https://i.imgur.com/9utgk.gif)
+Now multiply that for 20 fields! Awesome right?
 
-And have you ever had to return validation from the server after a socket/ajax call and show it in your form? Tired of no way of assigning errors dynamically? Does your scope variables look like a mess with state errors?
+![NO NO NO NO! HELL NO!](https://i.imgur.com/9utgk.gif)
 
 **This module aims to provide a D.R.Y. interface for your errors, and.... are you ready for it?**
 
-Interpolation! Make your errors beautiful and meaningful with magic. No more useless boring generic messages like "Please fill this field" and copy pasting divs all over the place or making a damn directive that adds them after each of your inputs, ffs.
+Interpolation! Make your errors beautiful and meaningful with magic. No more useless boring generic messages like "Please fill this field" for every 350 fields in your forms and copy pasting divs all over the place or making a damn directive that adds them after each of your inputs, and the need to use `$compile`, and all of the haX.
 
 ## Usage
 
@@ -70,21 +72,23 @@ angular
 ]);
 ```
 
-Retrieve localized messages from the server:
+Easily retrieve localized messages from the server:
 
 ```js
 angular
 .module('YourApp', ['ngErrorLookup'])
 .run(['ErrorLookup', '$http', function(ErrorLookup, $http){
-  $http.get('error-messages.json').success(function(messages){
+  $http.get('/error-messages.json').success(function(messages){
     // assuming your json structure is:
+    
     /* 
       {
          "required": "Você precisa preencher este campo",
          "email": "O email \"{{ value }}\" é inválido",
-         "blacklist": "O email não é permitido"
-       }
+         "blacklist": "O <strong>email</strong> não é permitido"
+      }
      */
+     
     for(var i in messages){
       ErrorLookup.messages.add(i, messages[i], 'html');
     }
@@ -92,11 +96,35 @@ angular
 }])
 ```
 
-But that's only for adding and manually setting error messages, which isn't useful for us, at all.
+But that's only for adding and manually setting error messages, which isn't much different from adding stuff to your controllers. We want moar. 
 
-There are a couple of reflected attributes that is only an alias for the underlaying model, for convenience:
+There are a couple of attributes you can display in your string messages:
 
-* `{{ value }}` is the same as `{{ model.$viewValue }}`
+* **`{{ label }}`**
+ 
+  Pretty name of the model, instead of displaying "login.data.user.email" to the user,
+  display something like "Your email"
+
+* **`{{ model }}`** 
+
+  The ngModel itself with all the bells and whistles, unchanged
+
+* **`{{ attrs }}`**
+
+  The $attrs from the current element with all the bells and whistles, unchanged
+  You can even add CSS classes to the element through here, omg messy spaghetti! <3
+
+* **`{{ value }}`**
+
+  Alias for the current model $viewValue
+
+* **`{{ scope }}`**
+  
+  The assigned scope
+
+* **`{{ models }}`**  
+
+  ALL the models in the current group! Means you can reference other ngModels, how cool is that?
 
 Since it uses interpolation, you always need to run the curryed function returned from the `ErrorLookup.error()`, since it has no watches and doesn't use `$compile` (that watch over expressions automatically):
 
@@ -107,7 +135,21 @@ angular
   ['$scope', 'ErrorLookup', 
   function($scope, ErrorLookup) {
     $scope.error = ErrorLookup.error($scope.id, 'user.email'); 
-    // this function changes the internal error array of the current model
+    // this function changes the internal error array of the current model everytime it's called, plus it returns
+    // the current error collection! (that is, an array of objects)
+    
+    // Get ALL the errors in a group and assign them to the scope
+    $scope.errors = ErrorLookup.errors($scope.id);
+    // $scope.errors.user
+    // $scope.errors.password
+    // $scope.errors.repeat
+    // $scope.errors.fullname
+    // $scope.errors.email
+    
+    // plucking just a few members
+    $scope.errors = ErrorLookup.errors($scope.id, ['user','password']);
+    // $scope.errors.user
+    // $scope.errors.password
     
     // or the controller-bound preferred way
     this.error = ErrorLookup.error('group', 'full.qualified.modelname.as.written.in.ng-model');
@@ -143,6 +185,7 @@ ErrorLookup.messages.add('dynamic', function(model){
   // model.model 
   
   // The $attrs from the current element with all the bells and whistles, unchanged
+  // You can even add CSS classes to the element through here, omg messy spaghetti! <3
   // model.attrs 
   
   // Alias for the current model $viewValue
@@ -159,9 +202,9 @@ ErrorLookup.messages.add('dynamic', function(model){
 });
 ```
 
-Let the cluster fuck ensue! Break ALL the conventions! Access ALL the models!
+Let the cluster fuck ensue! Break ALL the conventions! Access ALL the models! Wreck ALL the logic!
 
-#### Directive
+#### Directives
 
 The `error-lookup` directive will add any `ng-model` or `ng-form` element to the bunch. By default, `error-lookup` group elements by scope, but you can set your own name using `error-lookup="mygroup"` (it's preferable this way, although scope ids are unique)
 
