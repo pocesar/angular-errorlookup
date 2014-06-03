@@ -1,7 +1,9 @@
 AngularJS ErrorLookup
 ===================
 
-Because AngularJS general error messages still suck. ngMessages can kiss my ass. TL;DR http://pocesar.github.io/angular-errorlookup
+Because AngularJS general error messages still suck. ngMessages can kiss my ass. 
+
+TL;DR http://pocesar.github.io/angular-errorlookup
 
 ## Motivation
 
@@ -34,32 +36,44 @@ Take this for example:
 
 ![EWW NOPE NOPE. Burn it with fire.](https://i.imgur.com/9utgk.gif)
 
-This module aims to provide a D.R.Y. interface for your errors, and.... are you ready for it? 
+And have you ever had to return validation from the server after a socket/ajax call and show it in your form? Tired of no way of assigning errors dynamically? Does your scope variables look like a mess with state errors?
+
+**This module aims to provide a D.R.Y. interface for your errors, and.... are you ready for it?**
 
 Interpolation! Make your errors beautiful and meaningful with magic. No more useless boring generic messages like "Please fill this field" and copy pasting divs all over the place or making a damn directive that adds them after each of your inputs, ffs.
 
 ## Usage
 
-#### Service
+#### Provider
 
-The `ErrorLookup` service that holds all messages and instances, models and attributes from your elements so it can be the ultimate overlord of your errors (and messages, but mostly errors).
+The `ErrorLookup` provider and service is that holds all messages and instances, models and attributes from your elements so it can be the ultimate overlord of your errors (and messages, but mostly errors).
 
 ```js
-angular.module('YourApp', ['ngErrorLookup']).controller('MainCtrl', 
+angular
+.module('YourApp', ['ngErrorLookup'])
+.config(['ErrorLookupProvider', function(ErrorLookupProvider){
+  // ErrorLookupProvider allows you to remove/add/overwrite your messages before your controllers load
+  ErrorLookupProvider.add('creditcard', 'The provided credit card isn\'t valid');
+  ErrorLookupProvider.add('cvv', 'The CVV {{ model.$viewValue }} isn\'t valid for {{ scope.cardType }}');
+}]);
+.controller('MainCtrl', 
   ['$scope', 'ErrorLookup', 
   function($scope, ErrorLookup){
+    // ErrorLookup is the full blown service
     ErrorLookup.messages.types.email({value: 'name'}); // name is not a valid email
     // Everything in types are a function from "$interpolate"
     // You can overwrite them by using:
-    ErrorLookup.messages.add('email', 'O email {{value}} não é válido');
-    ErrorLookup.messages.types.email({value: 'name'}); // O email name não é válido
+    ErrorLookup.messages.add('email', 'O email "{{value}}" não é válido');
+    ErrorLookup.messages.types.email({value: 'name'}); // O email "name" não é válido
   }
 ]);
 ```
 
 But that's only for adding and manually setting error messages, which isn't useful for us, at all.
 
+There are a couple of reflected attributes that is only an alias for the underlaying model, for convenience:
 
+* {{ value }} is the same as {{ model.$viewValue }}
 
 #### Directive
 
