@@ -9,9 +9,34 @@ How is it better than `ngMessage` / `ngMessages`? Or plain old `ng-switch-when` 
 
 Because you need to write the same boring HTML markup over and over, and you need to cluttering your scope and controllers with useless state error messages. Plus, you are usually stuck with `modelController.$error` / `myForm.myModel.$error.required` / `myForm.$error.require[0].$error` (srsly wtf) boolean states.
 
+Take this for example:
+
+```html
+<form name="userForm">
+  <div class="field">
+    <label for="emailAddress">Enter your email address:</label>
+    <input type="email"
+           name="emailAddress"
+           ng-model="data.email"
+           ng-minlength="5"
+           ng-maxlength="30"
+           required />
+
+    <div ng-messages="userForm.emailAddress.$error">
+      <div ng-message="required">You left the field blank...</div>
+      <div ng-message="minlength">Your field is too short</div>
+      <div ng-message="maxlength">Your field is too long</div>
+      <div ng-message="email">Your field has an invalid email address</div>    
+    </div>
+  </div>
+</form>
+```
+
+![EWW NOPE NOPE. Burn it with fire.](https://i.imgur.com/9utgk.gif)
+
 This module aims to provide a D.R.Y. interface for your errors, and.... are you ready for it? 
 
-Interpolation! Make your errors beautiful. No more useless boring generic messages like "Please fill this field". 
+Interpolation! Make your errors beautiful and meaningful with magic. No more useless boring generic messages like "Please fill this field" and copy pasting divs all over the place or making a damn directive that adds them after each of your inputs, ffs.
 
 ## Usage
 
@@ -47,8 +72,8 @@ The `error-display` is a shortcut to the `ErrorLookup.error()` function. By defa
 <input ng-model="some.huge.ass.model.name" error-lookup="errorgroup1"> 
 <!-- Display some nasty errors to the user -->
 <ol error-display="some.huge.ass.model.name" error-scope="errorgroup1">
-  <li>{{ latest }}</li>
-  <li ng-repeat="error in errors">{{error}}</li>
+  <li>{{ latest }}</li> <!-- only one error at a time -->
+  <li ng-repeat="error in errors">{{error}}</li> <!-- or show ALL the errors -->
 </ol>
 ```
 
