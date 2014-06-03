@@ -1,7 +1,7 @@
 AngularJS ErrorLookup
 ===================
 
-Because AngularJS general error messages still suck. ngMessages can kiss my ass. TL;DR http://pocesat.github.io/angular-errorlookup
+Because AngularJS general error messages still suck. ngMessages can kiss my ass. TL;DR http://pocesar.github.io/angular-errorlookup
 
 ## Motivation
 
