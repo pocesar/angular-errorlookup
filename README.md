@@ -40,9 +40,11 @@ Now multiply that for 20 fields! Awesome right?
 
 ![NO NO NO NO! HELL NO!](https://i.imgur.com/9utgk.gif)
 
+This doesn't tie you with a controller or directives, it's an application-wide error messages service!
+
 **This module aims to provide a D.R.Y. interface for your errors, and.... are you ready for it?**
 
-Interpolation! Make your errors beautiful and meaningful with magic. No more useless boring generic messages like "Please fill this field" for every 350 fields in your forms and copy pasting divs all over the place or making a damn directive that adds them after each of your inputs, and the need to use `$compile`, and all of the haX.
+Interpolation and callbacks! Make your errors beautiful and meaningful with magic. No more useless boring generic messages like "Please fill this field" for every 350 fields in your forms and copy pasting divs all over the place or making a damn directive that adds them after each of your inputs, and the need to use `$compile`, and all of the haX, like appending divs to DOM without you wanting it to.
 
 ## Usage
 
