@@ -214,15 +214,15 @@ Let the clusterfuck ensue! Break ALL the conventions! Access ALL the models! Wre
 
 ##### API
 
-* ErrorLookupProvider.add(name: String, expr: String|Function, trustedContext:String)
+* `ErrorLookupProvider.add(name: String, expr: String|Function, trustedContext:String)`
   
   Queue a message to be lazy initialized when the ErrorLookup service is instantiated for the first time.
 
-* ErrorLookupProvider.remove(name: String)
+* `ErrorLookupProvider.remove(name: String)`
   
   Remove a message from the queue.
 
-* ErrorLookup.error(group: String, name: String)
+* `ErrorLookup.error(group: String, name: String)`
   
   Returns a function so you can control the error for that field. Executing the returning function 
   returns an array with the errors (or an empty array if none). The errors are kept internally between 
@@ -238,18 +238,6 @@ Let the clusterfuck ensue! Break ALL the conventions! Access ALL the models! Wre
   // returns [{name:'required',message:'You must fill your name',label:'your name'}] 
   ```
 
-* `ErrorLookup.remove()`
-
-* `ErrorLookup.add(scope: Scope, name: String, model: ngModel, attr: $attr, groupName: String, label: String)`
-
-  This method is boring as hell. Long parameter list and you shouldn't need to call it manually if you use the
-  directives. You need to provide everything to the function or it breaks.
-
-  * `scope`: the current scope
-  * `name`: the name of the ng-model, it automatically defaults to the string inside `ng-model="this.one.here"`
-  * `model`: the model itself (ngModelController) or ngFormController if you add a form model to it
-  * ``
-
 * `ErrorLookup.errors(group: String, pick: Array = [])`
 
   Returns an object with all the error functions from above. If you define an array in pick, you can retrieve
@@ -260,6 +248,27 @@ Let the clusterfuck ensue! Break ALL the conventions! Access ALL the models! Wre
   ErrorLookup.errors('group',['user','email']); // returns {'user':Function,'email':Function}
   ```
   
+* `ErrorLookup.remove(group: String, name: String)`
+
+  Remove the model from the errors pile
+
+  Eg:
+  ```js
+  ErrorLookup.remove(scope.$id, 'user');
+  ```
+
+* `ErrorLookup.add(scope: Scope, name: String, model: ngModel, attr: $attr, groupName: String, label: String)`
+
+  This method is boring as hell. Long parameter list and you shouldn't need to call it manually if you use the
+  directives. You need to provide everything to the function or it breaks.
+
+  * `scope`: the current scope
+  * `name`: the name of the ng-model, it automatically defaults to the string inside `ng-model="this.one.here"`
+  * `model`: the model itself (ngModelController) or ngFormController if you add a form model to it
+  * `attr`: the $attrs of the element
+  * `groupName`: the name of the model. Defaults to attrs.ngModel if not provided
+  * `label`: the label to give the error. Defaults to empty string
+
 * `ErrorLookup.messages`
 
   * `ErrorLookup.messages.add(name: String, expr: String|Function, trustedContext: String)`
@@ -303,10 +312,10 @@ The `error-display` is a shortcut to the `ErrorLookup.error()` function. By defa
 
 ```html
 <!-- add this element to our ErrorLookup service -->
-<input ng-model="some.huge.ass.model.name" error-lookup="errorgroup1" error-model="shorter" type="email"> 
+<input ng-model="some.huge.ass.model.name" error-lookup="errorgroup1" error-model="modelname" type="email"> 
 
 <!-- Display some nasty errors to the user -->
-<ol error-display="shorter" error-group="errorgroup1" error-label="your email">
+<ol error-display="modelname" error-group="errorgroup1" error-label="your email">
   <li>{{ latest.message }}</li> <!-- only the latest error in the stack -->
   <li ng-repeat="error in errors">{{error.message}}</li> <!-- or show ALL the errors -->
   <!-- you can even make your shit clickable -->
@@ -327,6 +336,3 @@ The `error-display` directive has 2 scope variables:
 * `errors`: that is an array of all errors on the current model / form, in the format `[{name: String, message: String, label: String}]`
 
 Since the scope isn't isolated, but a child scope, it inherits from the current scope it's in, so primitives are NOT updated, only arrays and objects. 
-
-##### API
-
