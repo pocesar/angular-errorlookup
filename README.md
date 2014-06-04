@@ -214,97 +214,103 @@ ErrorLookup.messages.add('dynamic', function(model){
 
 Let the clusterfuck ensue! Break ALL the conventions! Access ALL the models! Wreck ALL the declarative behavior!
 
-##### API
+### API
 
-* `ErrorLookupProvider.add(name: String, expr: String|Function, trustedContext:String)`
+#### Provider
+
+##### `ErrorLookupProvider.add(name: String, expr: String|Function, trustedContext:String)`
   
-  Queue a message to be lazy initialized when the ErrorLookup service is instantiated for the first time.
+Queue a message to be lazy initialized when the ErrorLookup service is instantiated for the first time.
 
-* `ErrorLookupProvider.remove(name: String)`
+##### `ErrorLookupProvider.remove(name: String)`
   
-  Remove a message from the queue.
+Remove a message from the queue.
 
-* `ErrorLookup.error(group: String, name: String)`
+#### Service
+
+##### `ErrorLookup.error(group: String, name: String)`
   
-  Returns a function so you can control the error for that field. Executing the returning function 
-  returns an array with the errors (or an empty array if none). The errors are kept internally between 
-  calls per model. 
+Returns a function so you can control the error for that field. Executing the returning function 
+returns an array with the errors (or an empty array if none). The errors are kept internally between 
+calls per model. 
 
-  It's safe to assign the returning array from this, because the array always keep the
-  reference. 
+It's safe to assign the returning array from this, because the array always keep the
+reference. 
 
-  Eg:
-  ```js
-  // returns Function(Extra: Object)
-  ErrorLookup.error('group','user')({'required':true}); 
-  // returns [{name:'required',message:'You must fill your name',label:'your name'}] 
-  ```
+Eg:
+```js
+// returns Function(Extra: Object)
+ErrorLookup.error('group','user')({'required':true}); 
+// returns [{name:'required',message:'You must fill your name',label:'your name'}] 
+```
 
-* `ErrorLookup.errors(group: String, pick: Array = [])`
+##### `ErrorLookup.errors(group: String, pick: Array = [])`
 
-  Returns an object with all the error functions from above. If you define an array in pick, you can retrieve
-  only some members of the group.
+Returns an object with all the error functions from above. If you define an array in pick, you can retrieve
+only some members of the group.
   
-  Eg:
-  ```js
-  ErrorLookup.errors('group',['user','email']); // returns {'user':Function,'email':Function}
-  ```
+Eg:
+```js
+ErrorLookup.errors('group',['user','email']); // returns {'user':Function,'email':Function}
+```
   
-* `ErrorLookup.remove(group: String, name: String)`
+##### `ErrorLookup.remove(group: String, name: String)`
 
-  Remove the model from the errors pile
+Remove the model from the errors pile
 
-  Eg:
-  ```js
-  ErrorLookup.remove(scope.$id, 'user');
-  ```
+Eg:
+```js
+ErrorLookup.remove(scope.$id, 'user');
+```
 
-* `ErrorLookup.add(scope: Scope, name: String, model: ngModel, attr: $attr, groupName: String, label: String)`
+##### `ErrorLookup.add(scope: Scope, name: String, model: ngModel, attr: $attr, groupName: String, label: String)`
 
-  This method is boring as hell. Long parameter list and you shouldn't need to call it manually if you use the
-  directives. You need to provide everything to the function or it breaks.
+This method is boring as hell. Long parameter list and you shouldn't need to call it manually if you use the
+directives. You need to provide everything to the function or it breaks.
 
-  * `scope`: the current scope
-  * `name`: the name of the ng-model, it automatically defaults to the string inside `ng-model="this.one.here"`
-  * `model`: the model itself (ngModelController) or ngFormController if you add a form model to it
-  * `attr`: the $attrs of the element
-  * `groupName`: the name of the model. Defaults to attrs.ngModel if not provided
-  * `label`: the label to give the error. Defaults to empty string
+* `scope`: the current scope
+* `name`: the name of the ng-model, it automatically defaults to the string inside `ng-model="this.one.here"`
+* `model`: the model itself (ngModelController) or ngFormController if you add a form model to it
+* `attr`: the $attrs of the element
+* `groupName`: the name of the model. Defaults to attrs.ngModel if not provided
+* `label`: the label to give the error. Defaults to empty string
 
-* `ErrorLookup.messages`
+#### `ErrorLookup.messages`
 
-  * `ErrorLookup.messages.add(name: String, expr: String|Function, trustedContext: String)`
+Keeps your application wide messages in a repository
+
+##### `ErrorLookup.messages.add(name: String, expr: String|Function, trustedContext: String)`
   
-  Adds a message. Accepts a function (callback!) or a interpolated string. If you set `trustedContext` to 'html'
-  it will use the `$sce` service and accept safe HTML in your interpolated string. 
+Adds a message. Accepts a function (callback!) or a interpolated string. If you set `trustedContext` to 'html'
+it will use the `$sce` service and accept safe HTML in your interpolated string. 
   
-  Eg:
-  ```js
-  ErrorLookup.messages.add('required', '<span class="well">You need to fill this field</span>', 'html');
-  ```
+Eg:
+```js
+ErrorLookup.messages.add('required', '<span class="well">You need to fill this field</span>', 'html');
+```
 
-  Returns the current `$interpolate`d string or the function you passed, you can call it right way.
+Returns the current `$interpolate`d string or the function you passed, you can call it right way.
 
-  * `ErrorLookup.messages.remove(name: String)`
+##### `ErrorLookup.messages.remove(name: String)`
    
-  Remove a message from the service
+Remove a message from the service
   
-  Eg:
-  ```js
-  ErrorLookup.messages.remove('required'); // all required errors will never be displayed =(
-  ```
+Eg:
+```js
+ErrorLookup.messages.remove('required'); // all required errors will never be displayed =(
+```
   
-  * `ErrorLookup.messages.include(url: String)`
+##### `ErrorLookup.messages.include(url: String)`
    
-  Loads a JSON representation of your messages.
-  Returns a promise. If you modify the resulting value, you can modify the included messages
+Loads a JSON representation of your messages.
+Returns a promise. If you modify the resulting value, you can modify the included messages
 
-  Eg:
-  ```js
-  ErrorLookup.messages.include('/messages.json').then(function(messages){
-    delete messages['required'];
-  });
-  ```
+Eg:
+```js
+ErrorLookup.messages.include('/messages.json').then(function(messages){
+  delete messages['required'];
+});
+```
   
 #### Directives
 
