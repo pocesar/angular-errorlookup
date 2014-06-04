@@ -40,7 +40,7 @@ Now multiply that for 20 fields! Awesome right?
 
 ![NO NO NO NO! HELL NO!](https://i.imgur.com/9utgk.gif)
 
-This doesn't tie you with a controller or directives, it's an application-wide error messages service with helper directives for the heavy lifting!
+This doesn't tie you with a controller or directives, it's an application-wide error messages service with helper directives for the heavy lifting! ngMessages doesn't offer you a way to programatically set errors (unless you create a directive that requires ngModel and ngMessages, and you do the bridge, aka, hot mess)
 
 **This module aims to provide a D.R.Y. interface for your errors, and.... are you ready for it?**
 
@@ -48,7 +48,7 @@ Interpolation and callbacks! Make your errors beautiful and meaningful with magi
 
 ## Usage
 
-#### Provider
+### Provider and Service
 
 The `ErrorLookup` provider and service is that holds all messages and instances, models and attributes from your elements so it can be the ultimate overlord of your errors (and messages, but mostly errors).
 
