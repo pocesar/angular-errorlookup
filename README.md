@@ -40,7 +40,7 @@ Now multiply that for 20 fields! Awesome right?
 
 ![NO NO NO NO! HELL NO!](https://i.imgur.com/9utgk.gif)
 
-This doesn't tie you with a controller or directives, it's an application-wide error messages service!
+This doesn't tie you with a controller or directives, it's an application-wide error messages service with helper directives for the heavy lifting!
 
 **This module aims to provide a D.R.Y. interface for your errors, and.... are you ready for it?**
 
