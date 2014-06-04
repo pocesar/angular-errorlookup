@@ -232,12 +232,23 @@ Let the clusterfuck ensue! Break ALL the conventions! Access ALL the models! Wre
   reference. 
 
   Eg:
-   
   ```js
   // returns Function(Extra: Object)
   ErrorLookup.error('group','user')({'required':true}); 
   // returns [{name:'required',message:'You must fill your name',label:'your name'}] 
   ```
+
+* `ErrorLookup.remove()`
+
+* `ErrorLookup.add(scope: Scope, name: String, model: ngModel, attr: $attr, groupName: String, label: String)`
+
+  This method is boring as hell. Long parameter list and you shouldn't need to call it manually if you use the
+  directives. You need to provide everything to the function or it breaks.
+
+  * `scope`: the current scope
+  * `name`: the name of the ng-model, it automatically defaults to the string inside `ng-model="this.one.here"`
+  * `model`: the model itself (ngModelController) or ngFormController if you add a form model to it
+  * ``
 
 * `ErrorLookup.errors(group: String, pick: Array = [])`
 
@@ -245,7 +256,6 @@ Let the clusterfuck ensue! Break ALL the conventions! Access ALL the models! Wre
   only some members of the group.
   
   Eg:
-  
   ```js
   ErrorLookup.errors('group',['user','email']); // returns {'user':Function,'email':Function}
   ```
@@ -262,11 +272,16 @@ Let the clusterfuck ensue! Break ALL the conventions! Access ALL the models! Wre
   ErrorLookup.messages.add('required', '<span class="well">You need to fill this field</span>', 'html');
   ```
 
-  Returns the current `$interpolate`d string or the function you passed
+  Returns the current `$interpolate`d string or the function you passed, you can call it right way.
 
   * `ErrorLookup.messages.remove(name: String)`
    
   Remove a message from the service
+  
+  Eg:
+  ```js
+  ErrorLookup.messages.remove('required'); // all required errors will never be displayed =(
+  ```
   
   * `ErrorLookup.messages.include(url: String)`
    
@@ -282,20 +297,28 @@ Let the clusterfuck ensue! Break ALL the conventions! Access ALL the models! Wre
   
 #### Directives
 
-The `error-lookup` directive will add any `ng-model` or `ng-form` element to the bunch. By default, `error-lookup` group elements by scope, but you can set your own name using `error-lookup="mygroup"` (it's preferable this way, although scope ids are unique)
+The `error-lookup` directive will add any `ng-model` or `ng-form` element to the bunch. By default, `error-lookup` group elements by `scope.$id`, but you can set your own name using `error-lookup="mygroup"` (it's preferable this way)
 
-The `error-display` is a shortcut to the `ErrorLookup.error()` function. By default, the `error-display` must be in the same scope as the `error-lookup` directive, or it won't know where to look for errors. To specify another scope you need to pass an attribute `error-scope="nameofscope"`, that can be an expression or a plain string. 
+The `error-display` is a shortcut to the `ErrorLookup.error()` function. By default, the `error-display` must be in the same scope as the `error-lookup` directive for it to inherit data from the scope, or it won't know where to look for errors. To specify another group name you need to pass an attribute `error-group="name of group"`. 
 
 ```html
 <!-- add this element to our ErrorLookup service -->
-<input ng-model="some.huge.ass.model.name" error-lookup="errorgroup1"> 
+<input ng-model="some.huge.ass.model.name" error-lookup="errorgroup1" error-model="shorter" type="email"> 
+
 <!-- Display some nasty errors to the user -->
-<ol error-display="some.huge.ass.model.name" error-scope="errorgroup1">
+<ol error-display="shorter" error-group="errorgroup1" error-label="your email">
   <li>{{ latest.message }}</li> <!-- only the latest error in the stack -->
   <li ng-repeat="error in errors">{{error.message}}</li> <!-- or show ALL the errors -->
   <!-- you can even make your shit clickable -->
   <li ng-repeat="error in errors" ng-click="myWorldController.click(error)" ng-bind-html="error.message"></li> 
 </ol>
+
+<!-- you can put it on forms, and ALL your ng models will be added -->
+<form error-lookup name="fuck">
+  <input ng-model="doh">
+  <input ng-model="srsly">
+  <input ng-model="input">
+</form>
 ```
 
 The `error-display` directive has 2 scope variables: 
