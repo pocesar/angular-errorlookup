@@ -94,6 +94,14 @@ angular
     }
   });
 }])
+
+// or just use the helper FFS
+.run(['ErrorLookup', function(ErrorLookup){
+  // Load ALL the messages
+  ErrorLookup.messages.include('/error-messages.json').then(function(messages){
+    // changing messages change them internally w00t
+  }); 
+}]);
 ```
 
 But that's only for adding and manually setting error messages, which isn't much different from adding stuff to your controllers. We want moar. 
@@ -112,7 +120,7 @@ There are a couple of attributes you can display in your string messages:
 * **`{{ attrs }}`**
 
   The $attrs from the current element with all the bells and whistles, unchanged
-  You can even add CSS classes to the element through here, omg messy spaghetti! <3
+  You can even add CSS classes to the element through here, omg messy spaghetti! 
 
 * **`{{ value }}`**
 
@@ -136,7 +144,7 @@ angular
   function($scope, ErrorLookup) {
     $scope.error = ErrorLookup.error($scope.id, 'user.email'); 
     // this function changes the internal error array of the current model everytime it's called, plus it returns
-    // the current error collection! (that is, an array of objects)
+    // the current error collection! (that is, an array of objects) So it's a setter AND a getter
     
     // Get ALL the errors in a group and assign them to the scope
     $scope.errors = ErrorLookup.errors($scope.id);
@@ -202,8 +210,76 @@ ErrorLookup.messages.add('dynamic', function(model){
 });
 ```
 
-Let the cluster fuck ensue! Break ALL the conventions! Access ALL the models! Wreck ALL the logic!
+Let the clusterfuck ensue! Break ALL the conventions! Access ALL the models! Wreck ALL the declarative behavior!
 
+##### API
+
+* ErrorLookupProvider.add(name: String, expr: String|Function, trustedContext:String)
+  
+  Queue a message to be lazy initialized when the ErrorLookup service is instantiated for the first time.
+
+* ErrorLookupProvider.remove(name: String)
+  
+  Remove a message from the queue.
+
+* ErrorLookup.error(group: String, name: String)
+  
+  Returns a function so you can control the error for that field. Executing the returning function 
+  returns an array with the errors (or an empty array if none). The errors are kept internally between 
+  calls per model. 
+
+  It's safe to assign the returning array from this, because the array always keep the
+  reference. 
+
+  Eg:
+   
+  ```js
+  // returns Function(Extra: Object)
+  ErrorLookup.error('group','user')({'required':true}); 
+  // returns [{name:'required',message:'You must fill your name',label:'your name'}] 
+  ```
+
+* `ErrorLookup.errors(group: String, pick: Array = [])`
+
+  Returns an object with all the error functions from above. If you define an array in pick, you can retrieve
+  only some members of the group.
+  
+  Eg:
+  
+  ```js
+  ErrorLookup.errors('group',['user','email']); // returns {'user':Function,'email':Function}
+  ```
+  
+* `ErrorLookup.messages`
+
+  * `ErrorLookup.messages.add(name: String, expr: String|Function, trustedContext: String)`
+  
+  Adds a message. Accepts a function (callback!) or a interpolated string. If you set `trustedContext` to 'html'
+  it will use the `$sce` service and accept safe HTML in your interpolated string. 
+  
+  Eg:
+  ```js
+  ErrorLookup.messages.add('required', '<span class="well">You need to fill this field</span>', 'html');
+  ```
+
+  Returns the current `$interpolate`d string or the function you passed
+
+  * `ErrorLookup.messages.remove(name: String)`
+   
+  Remove a message from the service
+  
+  * `ErrorLookup.messages.include(url: String)`
+   
+  Loads a JSON representation of your messages.
+  Returns a promise. If you modify the resulting value, you can modify the included messages
+
+  Eg:
+  ```js
+  ErrorLookup.messages.include('/messages.json').then(function(messages){
+    delete messages['required'];
+  });
+  ```
+  
 #### Directives
 
 The `error-lookup` directive will add any `ng-model` or `ng-form` element to the bunch. By default, `error-lookup` group elements by scope, but you can set your own name using `error-lookup="mygroup"` (it's preferable this way, although scope ids are unique)
@@ -225,6 +301,9 @@ The `error-display` is a shortcut to the `ErrorLookup.error()` function. By defa
 The `error-display` directive has 2 scope variables: 
 
 * `latest`: that is the top most error for that field, containing `name`, `message` and `label`
-* `errors`: that is an array of all errors on the current model / form, in the format `[{name: String, error: String, label: String}]`
+* `errors`: that is an array of all errors on the current model / form, in the format `[{name: String, message: String, label: String}]`
 
 Since the scope isn't isolated, but a child scope, it inherits from the current scope it's in, so primitives are NOT updated, only arrays and objects. 
+
+##### API
+
