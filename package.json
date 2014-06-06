@@ -12,7 +12,8 @@
   "devDependencies":{
     "karma":"0.12.x",
     "karma-firefox-launcher":"*",
-    "karma-mocha":"*"
+    "karma-mocha":"*",
+    "karma-spec-reporter":"*"
   },
   "scripts":{
     "test": "node ./node_modules/karma/bin/karma start ./test/karma.conf.js"
