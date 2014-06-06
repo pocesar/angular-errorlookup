@@ -5,8 +5,8 @@ module.exports = function (config){
     frameworks    : ['mocha'],
 
     files         : [
-			'bower_components/angular/angular.js',
-			'bower_components/angular-mocks/angular-mocks.js',
+      'bower_components/angular/angular.js',
+      'bower_components/angular-mocks/angular-mocks.js',
       'bower_components/expect/index.js',
       'test/test.js'
     ],
