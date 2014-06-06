@@ -16,7 +16,7 @@ module.exports = function (config){
 
     proxies       : {},
 
-    reporters     : ['progress'],
+    reporters     : ['spec'],
 
     port          : 9876,
 
