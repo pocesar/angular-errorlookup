@@ -15,6 +15,6 @@
     "karma-mocha":"*"
   },
   "scripts":{
-    "test": "./node_modules/.bin/karma start ./test/karma.conf.js"
+    "test": "node ./node_modules/karma/bin/karma start ./test/karma.conf.js"
   }
 }
