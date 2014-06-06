@@ -98,6 +98,39 @@ describe('ErrorLookup', function (){
         expect(ErrorLookup.messages.types.dummy).to.be.an('undefined');
       }));
 
+      describe('include', function(){
+        var $httpBackend;
+
+        beforeEach(inject(function($injector){
+          $httpBackend = $injector.get('$httpBackend');
+          $httpBackend.when('GET', '/messages.json').respond(200, {required:'fill {{ field }}',email:'not an email'});
+        }));
+
+        it('loads and manipulates messages', function(done){
+
+          inject(function(ErrorLookup, $templateCache){
+            ErrorLookup.messages.include('/messages.json').then(function(messages){
+              delete messages['min'];
+
+              expect($templateCache.get('/messages.json')).to.be.ok();
+
+              expect(ErrorLookup.messages.types.min).to.be.an('undefined');
+              expect(ErrorLookup.messages.types.required({field: 'lol'})).to.be('fill lol');
+              expect(ErrorLookup.messages.types.email()).to.be('not an email');
+
+            }).then(done);
+
+            $httpBackend.flush();
+          });
+        });
+
+        afterEach(function(){
+          $httpBackend.verifyNoOutstandingExpectation();
+          $httpBackend.verifyNoOutstandingRequest();
+        });
+      });
+
+
     });
 
     describe('errors', function (){
@@ -281,35 +314,35 @@ describe('ErrorLookup', function (){
 
           expect(added.error()).to.eql([
             {
-              type    : 'required',
-              message : 'You must fill named',
-              model   : added.item.model.$error.required[0],
-              name    : 'frm',
-              label   : 'named'
+              type   : 'required',
+              message: 'You must fill named',
+              model  : added.item.model.$error.required[0],
+              name   : 'frm',
+              label  : 'named'
             },
             {
               type   : 'email',
               message: 'asdf is not a valid email',
-              model   : added.item.model.$error.email[0],
+              model  : added.item.model.$error.email[0],
               name   : 'frm',
               label  : 'email'
             }
           ]);
 
-          expect(added.error({required:'aloha'})).to.eql([
+          expect(added.error({required: 'aloha'})).to.eql([
             {
-              type: 'required',
+              type   : 'required',
               message: 'aloha',
-              model: added.item.model,
-              name:'frm',
-              label:'frm'
+              model  : added.item.model,
+              name   : 'frm',
+              label  : 'frm'
             },
             {
-              type: 'email',
+              type   : 'email',
               message: 'asdf is not a valid email',
-              model: added.item.model.$error.email[0],
-              name:'frm',
-              label:'email'
+              model  : added.item.model.$error.email[0],
+              name   : 'frm',
+              label  : 'email'
             }
           ]);
         }));
@@ -320,7 +353,7 @@ describe('ErrorLookup', function (){
 
           var added = ErrorLookup.add(frm.scope, 'NAME', frm.controller, {}, false, 'My Form');
 
-          added.label('dummy','Some field');
+          added.label('dummy', 'Some field');
 
           frm.scope.$digest();
 
@@ -335,6 +368,98 @@ describe('ErrorLookup', function (){
           ]);
         }));
       });
+
+      it('force errors to the model, without touching its value and without changing its state', inject(function (ErrorLookup){
+        var
+          input = createModel('dummy', false, '<input ng-model="dummy">');
+
+        var added = ErrorLookup.add(input.scope, 'OMG', input.controller, {'ngModel': 'dummy'});
+
+        input.scope.dummy = 'hooray!';
+        input.scope.$digest();
+
+        expect(added.error({'notyet': true})).to.eql([]);
+
+        ErrorLookup.messages.add('model', 'The model is {{ attrs.ngModel }} with value {{ value }}');
+
+        expect(added.error({'model': true})).to.eql([
+          {
+            type   : 'model',
+            message: 'The model is dummy with value hooray!',
+            model  : added.item.model,
+            label  : 'OMG',
+            name   : 'OMG'
+          }
+        ]);
+      }));
+
+      it('accepts the first available controller it finds', inject(function(ErrorLookup){
+        var
+          input = createModel('dummy', false, '<input ng-model="dummy">');
+
+        var added = ErrorLookup.add(input.scope, 'OMG', [undefined, undefined, input.controller], {'ngModel': 'dummy'});
+
+        expect(added.item.model).to.be(input.controller);
+      }));
+
+      it('has scope and group name', inject(function(ErrorLookup){
+        var
+          input = createModel('dummy'),
+          input2 = createModel('clumsy', input.scope)
+          ;
+
+        var added = [
+          ErrorLookup.add(input.scope, input.name, input.controller, {}, 'somegroup', 'main'),
+          ErrorLookup.add(input2.scope, input2.name, input2.controller, {}, 'somegroup', 'another')
+        ];
+
+        var obj = ErrorLookup.errors('somegroup');
+        expect(obj.dummy).to.be.a('function');
+        expect(obj.clumsy).to.be.a('function');
+        expect(obj.dummy()).to.be(added[0].error());
+        expect(obj.clumsy()).to.be(added[1].error());
+
+        obj = ErrorLookup.errors('somegroup',['dummy']);
+        expect(obj.clumsy).to.be.an('undefined');
+
+        obj = ErrorLookup.errors('somegroup', false, true);
+
+        expect(obj.dummy).to.be.an('array');
+        expect(obj.clumsy).to.be.an('array');
+      }));
+
+      it('keep reference', inject(function(ErrorLookup){
+        var
+          input = createModel('name');
+
+        ErrorLookup.add(input.scope, input.name, input.controller, {}, 'group');
+
+        var errors = ErrorLookup.get('group','name').errors;
+
+        expect(errors).to.be.an('array');
+        expect(errors).to.have.length(0);
+
+        ErrorLookup.error('group','name')({required: true});
+
+        expect(errors).to.have.length(1);
+        expect(ErrorLookup.error('group','name')({required: true}, true)).to.be(errors);
+        expect(ErrorLookup.errors('group',['name'],true)).to.eql({
+          name: errors
+        });
+      }));
+
+      it('returns empty object on invalid group', inject(function(ErrorLookup){
+        expect(ErrorLookup.errors('invalid')).to.eql({});
+      }));
+
+      it('returns empty object on invalid picks', inject(function(ErrorLookup){
+        var
+          input = createModel('name');
+
+        ErrorLookup.add(input.scope, input.name, input.controller, {});
+
+        expect(ErrorLookup.errors(input.scope.$id,['nope','nope','nope'])).to.eql({});
+      }));
     });
 
   });
