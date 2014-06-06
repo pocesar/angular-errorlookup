@@ -1,0 +1,16 @@
+{
+  "name":"angular-errorlookup",
+  "version":"0.1.0",
+  "engines":{
+    "node":">=0.10.0"
+  },
+  "dependencies":{},
+  "devDependencies":{
+    "karma":"0.12.x",
+    "karma-firefox-launcher":"*",
+    "karma-mocha":"*"
+  },
+  "scripts":{
+    "test": "./node_modules/.bin/karma start test/karma.conf.js --browsers Firefox --single-run"
+  }
+}
