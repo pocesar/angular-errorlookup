@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/pocesar/angular-errorlookup.svg?branch=master)](https://travis-ci.org/pocesar/angular-errorlookup?branch=master)
+
 AngularJS ErrorLookup
 ===================
 
