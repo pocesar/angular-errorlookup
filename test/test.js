@@ -2,7 +2,6 @@
 
 describe('ErrorLookup', function (){
 
-  beforeEach(inject.strictDi());
   beforeEach(module('ngErrorLookup'));
 
   // Provider
