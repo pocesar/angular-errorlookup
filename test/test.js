@@ -136,16 +136,16 @@ describe('ErrorLookup', function (){
           var added = ErrorLookup.add(input.scope, input.name, input.controller, {});
           expect(added.error).to.be.a('function');
           expect(added.remove).to.be.a('function');
-          expect(added.model.model).to.be(input.controller);
-          expect(ErrorLookup.get(input.scope.$id, input.name)).to.be(added.model);
-          expect(added.model.model.$setViewValue).to.be.a('function');
+          expect(added.item.model).to.be(input.controller);
+          expect(ErrorLookup.get(input.scope.$id, input.name)).to.be(added.item);
+          expect(added.item.model.$setViewValue).to.be.a('function');
 
           added = ErrorLookup.add(form.scope, form.name, form.controller, {});
           expect(added.error).to.be.a('function');
           expect(added.remove).to.be.a('function');
-          expect(added.model.model).to.be(form.controller);
-          expect(ErrorLookup.get(form.scope.$id, form.name)).to.be(added.model);
-          expect(added.model.model.$addControl).to.be.a('function');
+          expect(added.item.model).to.be(form.controller);
+          expect(ErrorLookup.get(form.scope.$id, form.name)).to.be(added.item);
+          expect(added.item.model.$addControl).to.be.a('function');
         });
       });
 
@@ -162,7 +162,9 @@ describe('ErrorLookup', function (){
 
           expect(added.error()).to.eql([
             {
-              name   : 'required',
+              type   : 'required',
+              model  : added.item.model,
+              name   : 'dummy',
               message: 'fill it',
               label  : 'dummy'
             }
@@ -207,8 +209,10 @@ describe('ErrorLookup', function (){
 
         expect(errors.error()).to.eql([
           {
-            name   : 'required',
+            type   : 'required',
             message: 'WOW I loled!',
+            model  : errors.item.model,
+            name   : 'dummy',
             label  : 'dummy'
           }
         ]);
@@ -225,18 +229,117 @@ describe('ErrorLookup', function (){
         input.scope.$digest();
 
         expect(added.error()).to.eql([]);
-        expect(added.model.errors).to.eql([]);
-        expect(added.model.errors).to.be(added.error());
+        expect(added.item.errors).to.eql([]);
+        expect(added.item.errors).to.be(added.error());
       }));
 
+      describe('form', function (){
+        it('empty array on no errors', inject(function (ErrorLookup){
+          var
+            frm = createModel('frm', false, '<form><input ng-model="dummy"></form>', 'form');
+
+          var added = ErrorLookup.add(frm.scope, frm.name, frm.controller, {});
+
+          frm.scope.$digest();
+
+          expect(added.error()).to.eql([]);
+          expect(added.item.errors).to.eql([]);
+          expect(added.item.errors).to.be(added.error());
+        }));
+
+        it('display errors from sub models', inject(function (ErrorLookup){
+          var
+            frm = createModel('frm', false, '<form><input ng-model="dummy" required></form>', 'form');
+
+          var added = ErrorLookup.add(frm.scope, frm.name, frm.controller, {});
+
+          frm.scope.$digest();
+
+          var eql = [
+            {
+              type   : 'required',
+              message: 'You must fill this field',
+              model  : added.item.model.$error.required[0],
+              name   : 'frm',
+              label  : 'frm'
+            }
+          ];
+
+          expect(added.error()).to.eql(eql);
+          expect(added.item.errors).to.eql(eql);
+          expect(added.item.errors).to.be(added.error());
+
+          frm.scope.dummy = 'asdf';
+          frm.scope.$digest();
+
+          expect(added.error()).to.eql([]);
+
+          frm = createModel('frm', false, '<form><input ng-model="dummy" name="named" required><input ng-model="email" name="email" type="email"></form>', 'form');
+          added = ErrorLookup.add(frm.scope, frm.name, frm.controller, {});
+          frm.scope.email = 'asdf';
+          frm.scope.$digest();
+
+          expect(added.error()).to.eql([
+            {
+              type    : 'required',
+              message : 'You must fill named',
+              model   : added.item.model.$error.required[0],
+              name    : 'frm',
+              label   : 'named'
+            },
+            {
+              type   : 'email',
+              message: 'asdf is not a valid email',
+              model   : added.item.model.$error.email[0],
+              name   : 'frm',
+              label  : 'email'
+            }
+          ]);
+
+          expect(added.error({required:'aloha'})).to.eql([
+            {
+              type: 'required',
+              message: 'aloha',
+              model: added.item.model,
+              name:'frm',
+              label:'frm'
+            },
+            {
+              type: 'email',
+              message: 'asdf is not a valid email',
+              model: added.item.model.$error.email[0],
+              name:'frm',
+              label:'email'
+            }
+          ]);
+        }));
+
+        it('display errors from sub models with labels', inject(function (ErrorLookup){
+          var
+            frm = createModel('frm', false, '<form><input ng-model="dummy" name="dummy" required></form>', 'form');
+
+          var added = ErrorLookup.add(frm.scope, 'NAME', frm.controller, {}, false, 'My Form');
+
+          added.label('dummy','Some field');
+
+          frm.scope.$digest();
+
+          expect(added.error()).to.eql([
+            {
+              type   : 'required',
+              model  : added.item.model.$error.required[0],
+              message: 'You must fill Some field',
+              name   : 'My Form',
+              label  : 'Some field'
+            }
+          ]);
+        }));
+      });
     });
 
   });
 
   describe('directives', function (){
-
-    it('exists', function (){
-    });
 
   });
 });
