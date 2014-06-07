@@ -445,3 +445,13 @@ Is the function of all errors on the current model / form, in the format, you ca
 ```
 
 Since the scope isn't isolated, but a child scope, it inherits from the current scope it's in, make sure to understand scope inheritance before you try your hax0rs in the code. 
+
+#### Filter
+
+Along with the `error-display` directive, you can return all the messages only by using the filter `errorMessages`:
+
+```html
+<div error-display="name">
+  <div ng-repeat="error in errors() | errorMessages"></div>
+</div>
+```
