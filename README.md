@@ -107,32 +107,30 @@ But that's only for adding and manually setting error messages, which isn't much
 
 There are a couple of attributes you can display in your string messages:
 
-##### **`{{ label }}`**
+###### **`{{ label }}`**
  
 Pretty name of the model, instead of displaying "login.data.user.email" to the user, display something like "Your email"
 
-##### **`{{ model }}`** 
+###### **`{{ model }}`** 
 
 The ngModel itself with all the bells and whistles, unchanged
 
-##### **`{{ attrs }}`**
+###### **`{{ attrs }}`**
 
 The $attrs from the current element with all the bells and whistles, unchanged
 You can even add CSS classes to the element through here, omg messy spaghetti! 
 
-##### **`{{ value }}`**
+###### **`{{ value }}`**
 
 Alias for the current model $viewValue
 
-##### **`{{ scope }}`**
+###### **`{{ scope }}`**
   
 The assigned scope
 
-##### **`{{ models }}`**  
+###### **`{{ models }}`**  
 
 ALL the models in the current group! Means you can reference other ngModels, how cool is that?
-
-
 
 Since it uses interpolation, you always need to run the curryed function returned from the `ErrorLookup.error()`, since it has no watches and doesn't use `$compile` (that watch over expressions automatically):
 
@@ -220,7 +218,7 @@ So let the clusterfuck ensue! Break ALL the conventions! Access ALL the models! 
 
 #### Provider
 
-##### `ErrorLookupProvider.add(name: String, expr: String|Function, trustedContext:String)`
+###### `ErrorLookupProvider.add(name: String, expr: String|Function, trustedContext:String)`
   
 Queue a message to be lazy initialized when the ErrorLookup service is instantiated for the first time.
 
@@ -229,7 +227,7 @@ ErrorLookupProvider.add('required','<strong>{{ label }}</strong> is awesome, you
 ErrorLookupProvider.add('hallelujah','praise almighty code');
 ```
 
-##### `ErrorLookupProvider.remove(name: String)`
+###### `ErrorLookupProvider.remove(name: String)`
   
 Remove a message from the queue.
 
@@ -239,7 +237,7 @@ ErrorLookupProvider.remove('required');
 
 #### Service
 
-##### `ErrorLookup.error(group: String, name: String, predefine: Object)`
+###### `ErrorLookup.error(group: String, name: String, predefine: Object)`
   
 Returns a function so you can control the error for that field. Executing the returning function 
 returns an array with the errors (or an empty array if none). The errors are kept internally between 
@@ -300,7 +298,7 @@ fn({'required':'w00t'});
 ] 
 ```
 
-##### `ErrorLookup.errors(group:String, pick:Array = [], arrays:Boolean = false, predefine:Object = {})`
+###### `ErrorLookup.errors(group:String, pick:Array = [], arrays:Boolean = false, predefine:Object = {})`
 
 Returns an object with all the error functions from above. If you define an array in pick, you can retrieve
 only some members of the group.
@@ -326,7 +324,7 @@ errors.email({required: true}); // [{type:'required','message':'w00b'}]
 errors.password({required: true}); // [{type:'required','message':'w00b'}]
 ```
   
-##### `ErrorLookup.remove(group: String, name: String)`
+###### `ErrorLookup.remove(group: String, name: String)`
 
 Remove the model from the errors pile
 
@@ -334,7 +332,7 @@ Remove the model from the errors pile
 ErrorLookup.remove(scope.$id, 'user');
 ```
 
-##### `ErrorLookup.add(config:Object)`
+###### `ErrorLookup.add(config:Object)`
 
 This method is boring as hell. Long parameter list and you shouldn't need to call it manually if you use the
 directives. You need to always provide non-optional stuff everytime to the function or it breaks.
@@ -367,11 +365,11 @@ The config object is as following:
 });
 ```
 
-#### `ErrorLookup.messages`
+##### `ErrorLookup.messages`
 
 Keeps your application wide messages in a repository
 
-##### `ErrorLookup.messages.add(name: String, expr: String|Function, trustedContext: String)`
+###### `ErrorLookup.messages.add(name: String, expr: String|Function, trustedContext: String)`
   
 Adds a message. Accepts a function (callback!) or a interpolated string. If you set `trustedContext` to 'html'
 it will use the `$sce` service and accept safe HTML in your interpolated string. 
@@ -382,7 +380,7 @@ ErrorLookup.messages.add('required', '<span class="well">You need to fill this f
 
 Returns the current `$interpolate`d string or the function you passed, you can call it right way.
 
-##### `ErrorLookup.messages.remove(name: String)`
+###### `ErrorLookup.messages.remove(name: String)`
    
 Remove a message from the service
   
@@ -390,7 +388,7 @@ Remove a message from the service
 ErrorLookup.messages.remove('required'); // all "required" error messages, will be silently skipped when this error is present on ngModel =(
 ```
   
-##### `ErrorLookup.messages.include(url: String)`
+###### `ErrorLookup.messages.include(url: String)`
    
 Loads a JSON representation of your messages.
 Returns a promise. If you modify the resulting value, you can modify the included messages
