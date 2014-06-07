@@ -405,14 +405,17 @@ ErrorLookup.messages.include('/messages.json').then(function(messages){
 
 The `error-lookup` directive will add any `ng-model` or `ng-form` element to the bunch. By default, `error-lookup` group elements by `scope.$id`, but you can set your own name using `error-lookup="mygroup"` (it's preferable this way, so you can reuse in your code)
 
-The `error-display` is a shortcut to the `ErrorLookup.error()` function. By default, the `error-display` must be in the same scope as the `error-lookup` directive for it to inherit data from the scope, or it won't know where to look for errors. But when you specify a string group name to `error-lookup`, you can pass an attribute `error-group="mygroup"`, then it knows where to look. 
+The `error-display` is a shortcut to the `ErrorLookup.error()` function. By default, the `error-display` must be in the same scope as the `error-lookup` directive for it to inherit data from the scope, or it won't know where to look for errors. 
+
+But when you can get around this by specifying a string group name to `error-lookup`, you can pass an attribute `error-group="mygroup"`, then it knows where to look and you can reuse the same "address" in your controllers, services and other directives. 
 
 ```html
 <!-- add this element to our ErrorLookup service -->
-<input ng-model="some.huge.ass.model.name.thatis.your.email" error-lookup-label="your email" error-lookup="errorgroup1" error-lookup-name="email" type="email" required> 
+<input ng-model="some.huge.ass.model.name.thatis.your.email" error-lookup-label="your email" error-lookup="login.interface" error-lookup-name="email" type="email" required> 
+<!-- You can, inside your controller, now use ErrorLookup.get('login.interface','email'), and even have access to this element lol, breaking conventions since 2014 -->
 
 <!-- Display some nasty errors to the user -->
-<ol error-display="email" error-group="errorgroup1">
+<ol error-display="email" error-group="login.interface">
   <li>{{ latest.message }}</li> <!-- only the latest error in the stack -->
   <li ng-repeat="error in errors()">{{error.message}}</li> <!-- or show ALL the errors -->
   <!-- you can even make your shit clickable -->
@@ -431,10 +434,16 @@ The `error-display` directive has 2 scope variables:
 
 ###### `latest`
 
-Is the top most error for that field, containing `name`, `message` and `label`
+Is the top most error for that field, containing the fields described in [ErrorLookup.error()](#errorlookuperrorgroup-string-name-string-predefine-object)
 
 ###### `errors`
 
-Is the function of all errors on the current model / form, in the format, you can override messages in here as you would in `ErrorLookup.error()({})`:
+Is the function of all errors on the current model / form, in the format, you can override messages in here as you would in `ErrorLookup.error()({required:'holy mother of code'})`:
 
-Since the scope isn't isolated, but a child scope, it inherits from the current scope it's in, so primitives are NOT updated, only arrays and objects. 
+```html
+<ol error-display="email" error-group="login.interface">
+  <li ng-repeat="error in errors({'required':'holy mother of code'})">{{error.label}}: {{ error.message }}</li>
+</ol>
+```
+
+Since the scope isn't isolated, but a child scope, it inherits from the current scope it's in, make sure to understand scope inheritance before you try your hax0rs in the code. 
