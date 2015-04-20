@@ -7,15 +7,17 @@ Because AngularJS general error messages still suck. ngMessages can kiss my ass.
 
 TL;DR http://pocesar.github.io/angular-errorlookup
 
+Made for Angular 1.4+, made in sexy Typescript
+
 ## Motivation
 
 How is it better than `ngMessage` / `ngMessages`? Or plain old `ng-switch-when` / `ng-if` directive and a bunch of divs?
 
 Because you need to write the same boring HTML markup over and over, and you need to cluttering your scope and controllers with useless state error messages. Plus, you are usually stuck with `modelController.$error` / `myForm.myModel.$error.required` / `myForm.$error.require[0].$error` (srsly wtf) boolean states. 
 
-It's nearly impossible to `$setValidity` without a helper directive that has access to some sort of global state, since the ngModel controllers and form controllers are only available inside directives that require them. Even worse when you  you have to return validation from the server after a socket/ajax call and show it in your form / models. 
+It's nearly impossible to `$setValidity` without a helper directive that has access to some sort of global state, since the ngModel controllers and form controllers are only available inside directives that require them. Even worse when you have to return validation from the server after a socket/ajax call and show it in your form / models. 
 
-So, are tired of no way of assigning errors dynamically, bypassing them when necessary? Does your scope variables look like a mess with state errors? Show a simple plain string on a form or console? 
+So, are you tired of no way of assigning errors dynamically, bypassing them when necessary? Does your scope variables look like a mess with state errors? How about show a simple plain string on a form or console without assigning it to a scope/controller variable? 
 
 Take this _superb_ code for example:
 
@@ -46,7 +48,7 @@ Now multiply that for 20 fields! Awesome right?
 
 This doesn't tie you with a controller or directives, and it doesn't aim to provide you a validation interface. 
 
-**This module aims to provide a D.R.Y. service for your errors**
+**This module aims to provide a D.R.Y. service for your errors, watching your models for errors only**
 
 It's an application-wide error messages service with helper directives for the heavy lifting! ngMessages doesn't offer you a way to programatically set errors (unless you create a directive that requires ngModel and ngMessages, and you do the bridge, aka, hot mess). You can use it in your DOM in a declarative manner, in your controller(s), in your directive(s), in other services, it keeps all your error messages under complete control (along with access to the bound element, scope and attributes).
 
@@ -56,7 +58,7 @@ Best of all: interpolation and callbacks! Make your errors beautiful and meaning
 
 ### Provider and Service
 
-The `ErrorLookup` provider and service is that holds all messages and instances, models and attributes from your elements so it can be the ultimate overlord of your errors (and messages, but mostly errors, since it checks the `$error` member of the controller).
+The `ErrorLookup` provider and service is that holds all messages and instances, models and attributes from your elements so it can be the ultimate overlord of your errors (and messages, but mostly errors, since it checks the `$error` member of the `ngModelController` and `FormController`).
 
 ```js
 angular
@@ -105,7 +107,7 @@ angular
 
 But that's only for adding and manually setting error messages, which isn't much different from adding stuff to your controllers. We want moar. 
 
-There are a couple of attributes you can display in your string messages:
+There are a couple of locals you can use in your string messages:
 
 ###### **`{{ label }}`**
  
@@ -126,7 +128,7 @@ Alias for the current model $viewValue
 
 ###### **`{{ scope }}`**
   
-The assigned scope
+The assigned scope. You may access your controller doing `scope.yourcontroller` in here as well. 
 
 ###### **`{{ models }}`**  
 
@@ -140,13 +142,13 @@ angular
 .controller('MainCtrl', 
   ['$scope', 'ErrorLookup', 
   function($scope, ErrorLookup) {
-    $scope.error = ErrorLookup.error($scope.id, 'user.email'); 
+    $scope.error = ErrorLookup.error('MainCtrl', 'user.email'); 
     // this function changes the internal error array of the current model everytime it's called, plus it returns
     // the current error collection! (that is, an array of objects) So it's a setter AND a getter
     // <div ng-bind="error()"></div>
     
     // Get ALL the errors in a group and assign them to the scope
-    $scope.errors = ErrorLookup.errors($scope.id);
+    $scope.errors = ErrorLookup.errors('MainCtrl');
     // $scope.errors.user
     // $scope.errors.password
     // $scope.errors.repeat
@@ -155,7 +157,7 @@ angular
     // <div ng-bind="errors.user()"></div>
     
     // plucking just a few members
-    $scope.errors = ErrorLookup.errors($scope.id, ['user','password']);
+    $scope.errors = ErrorLookup.errors('MainCtrl', ['user','password']);
     // $scope.errors.user
     // $scope.errors.password
     
