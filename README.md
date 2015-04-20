@@ -341,13 +341,15 @@ directives. You need to always provide non-optional stuff everytime to the funct
 
 The config object is as following:
 
-`config.scope` : the scope. [Not Optional]
-`config.name`  : the name of the ng-model, or any internal name you want to use. it must exist in the given scope [Not Optional]
-`config.model` : the model itself ngModelController (or ngFormController if you add a form model to it) [Not Optional]
-`config.attrs` : the $attrs of the element, you can pass an object too when not adding from inside a directive
-`config.group` : the group name, fallbacks to using `scope.$id`
-`config.label` : the label to give the error. Defaults to the name of the model. pretty name for your `login.data.user` as `Your username` for example
-`config.el`    : assign a DOM element to the current model
+
+* `config.scope` : the scope. [Not Optional]
+* `config.name`  : the name of the ng-model, or any internal name you want to use. it must exist in the given scope [Not Optional]
+* `config.model` : the model itself ngModelController (or ngFormController if you add a form model to it) [Not Optional]
+* `config.attrs` : the $attrs of the element, you can pass an object too when not adding from inside a directive
+* `config.group` : the group name, fallbacks to using `scope.$id`
+* `config.label` : the label to give the error. Defaults to the name of the model. pretty name for your 
+* `login.data.user` as `Your username` for example
+* `config.el`    : assign a DOM element to the current model
 
 ```js
 /* ... */
