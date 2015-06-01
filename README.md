@@ -13,9 +13,9 @@ Made for Angular 1.4+, made in sexy Typescript
 
 How is it better than `ngMessage` / `ngMessages`? Or plain old `ng-switch-when` / `ng-if` directive and a bunch of divs?
 
-Because you need to write the same boring HTML markup over and over, and you need to cluttering your scope and controllers with useless state error messages. Plus, you are usually stuck with `modelController.$error` / `myForm.myModel.$error.required` / `myForm.$error.require[0].$error` (srsly wtf) boolean states. 
+Because you need to write the same boring HTML markup over and over, and you need to cluttering your scope and controllers with useless state error messages. Plus, you are usually stuck with `modelController.$error` / `myForm.myModel.$error.required` / `myForm.$error.required[0].$error` (srsly wtf) boolean states. 
 
-It's nearly impossible to `$setValidity` without a helper directive that has access to some sort of global state, since the ngModel controllers and form controllers are only available inside directives that require them. Even worse when you have to return validation from the server after a socket/ajax call and show it in your form / models. 
+It's nearly impossible to `$setValidity` without a helper directive that has access to some sort of global state, since the ngModel controllers and form controllers are only available inside directives that require them or tied to a controller / scope. It's even worse, when you have to return validation from the server after a socket/ajax call and show it in your form / models, or after async validation. 
 
 So, are you tired of no way of assigning errors dynamically, bypassing them when necessary? Does your scope variables look like a mess with state errors? How about show a simple plain string on a form or console without assigning it to a scope/controller variable? 
 
@@ -46,11 +46,13 @@ Now multiply that for 20 fields! Awesome right?
 
 ![NO NO NO NO! HELL NO!](https://i.imgur.com/9utgk.gif)
 
-This doesn't tie you with a controller or directives, and it doesn't aim to provide you a validation interface. 
+This doesn't tie you with a controller or directives, and it doesn't aim to provide you a validation interface. (Use [angular-async-validator](https://github.com/pocesar/angular-async-validator) for that) 
 
-**This module aims to provide a D.R.Y. service for your errors, watching your models for errors only**
+**This module aims to provide a D.R.Y. service for your errors, watching your models for ERRORS only**
 
-It's an application-wide error messages service with helper directives for the heavy lifting! ngMessages doesn't offer you a way to programatically set errors (unless you create a directive that requires ngModel and ngMessages, and you do the bridge, aka, hot mess). You can use it in your DOM in a declarative manner, in your controller(s), in your directive(s), in other services, it keeps all your error messages under complete control (along with access to the bound element, scope and attributes).
+It's an application-wide error messages service with helper directives for the heavy lifting! ngMessages doesn't offer you a way to programatically set errors (unless you create a directive that requires ngModel and ngMessages, and you do the bridge, aka, hot mess). 
+
+You can use ErrorLookup in your DOM in a declarative manner, in your controller(s), in your directive(s), in  services (biggest win!), it keeps all your error messages under complete control (along with access to the bound element, scope and attributes), and you can have them using translations as well.
 
 Best of all: interpolation and callbacks! Make your errors beautiful and meaningful with magic. No more useless boring generic messages like "Please fill this field" for every 350 fields in your forms and copy pasting divs all over the place or making a damn directive that adds them after each of your inputs, and the need to use `$compile`, and all of the haX, like appending divs to DOM without you wanting it to.
 
@@ -64,16 +66,22 @@ The `ErrorLookup` provider and service is that holds all messages and instances,
 angular
 .module('YourApp', ['ngErrorLookup'])
 .config(['ErrorLookupProvider', function(ErrorLookupProvider){
+
   // ErrorLookupProvider allows you to remove/add/overwrite your messages before your controllers load
   ErrorLookupProvider.add('creditcard', 'The provided credit card isn\'t valid');
+  
   ErrorLookupProvider.add('cvv', 'The CVV {{ model.$viewValue }} isn\'t valid for {{ scope.cardType }}');
+  
   ErrorLookupProvider.add('repeated', 'The value {{ value }} doesn\'t match {{ models.fucker.model.$viewValue }}');
+  
 }])
 .controller('MainCtrl', 
   ['$scope', 'ErrorLookup', 
   function($scope, ErrorLookup){
+  
     // ErrorLookup is the full blown service
     ErrorLookup.messages.types.email({value: 'name'}); // name is not a valid email
+  
     // Everything in types are a function from "$interpolate"
     // You can overwrite them by using:
     ErrorLookup.messages.add('email', 'O email "{{value}}" não é válido');
@@ -87,7 +95,7 @@ Easily retrieve localized messages from the server:
 ```js
 angular
 .module('YourApp', ['ngErrorLookup'])
-//  just use the helper FFS
+// just use the helper FFS
 // assuming your json structure is:
 
 /* 
@@ -100,7 +108,8 @@ angular
 .run(['ErrorLookup', function(ErrorLookup){
   // Load ALL the messages
   ErrorLookup.messages.include('/error-messages.json').then(function(messages){
-    // changing messages change them internally w00t
+    // changing messages change them internally before applying it
+    delete messages['required'];
   }); 
 }]);
 ```
@@ -109,30 +118,30 @@ But that's only for adding and manually setting error messages, which isn't much
 
 There are a couple of locals you can use in your string messages:
 
-###### **`{{ label }}`**
+##### `{{ $label }}`
  
-Pretty name of the model, instead of displaying "login.data.user.email" to the user, display something like "Your email"
+Pretty name of the model, instead of displaying "login.data.user.email" to the user, display something like "Your email". On the directive, it's the value of `error-lookup-label`
 
-###### **`{{ model }}`** 
+##### `{{ $model }}`
 
-The ngModel itself with all the bells and whistles, unchanged
+The ngModel itself with all the bells and whistles, unchanged. On the directive, it's the value of `ng-model`
 
-###### **`{{ attrs }}`**
+##### `{{ $attrs }}`
 
 The $attrs from the current element with all the bells and whistles, unchanged
 You can even add CSS classes to the element through here, omg messy spaghetti! 
 
-###### **`{{ value }}`**
+##### `{{ $value }}`
 
 Alias for the current model $viewValue
 
-###### **`{{ scope }}`**
+##### `{{ $scope }}`
   
-The assigned scope. You may access your controller doing `scope.yourcontroller` in here as well. 
+The assigned scope. You may access your controller doing `$scope.yourcontroller` in here as well. 
 
-###### **`{{ models }}`**  
+##### `{{ $models }}`
 
-ALL the models in the current group! Means you can reference other ngModels, how cool is that?
+ALL the models in the current group! Means you can reference other `ngModels`, how cool is that?
 
 Since it uses interpolation, you always need to run the curryed function returned from the `ErrorLookup.error()`, since it has no watches and doesn't use `$compile` (that watch over expressions automatically):
 
@@ -142,11 +151,12 @@ angular
 .controller('MainCtrl', 
   ['$scope', 'ErrorLookup', 
   function($scope, ErrorLookup) {
+  
     $scope.error = ErrorLookup.error('MainCtrl', 'user.email'); 
     // this function changes the internal error array of the current model everytime it's called, plus it returns
     // the current error collection! (that is, an array of objects) So it's a setter AND a getter
-    // <div ng-bind="error()"></div>
-    
+    // <div ng-repeat="error in error() track by error.message"></div>
+
     // Get ALL the errors in a group and assign them to the scope
     $scope.errors = ErrorLookup.errors('MainCtrl');
     // $scope.errors.user
@@ -154,12 +164,12 @@ angular
     // $scope.errors.repeat
     // $scope.errors.fullname
     // $scope.errors.email
-    // <div ng-bind="errors.user()"></div>
+    // <div ng-repeat="error in errors.user() track by error.message"></div>
     
     // plucking just a few members
     $scope.errors = ErrorLookup.errors('MainCtrl', ['user','password']);
-    // $scope.errors.user
-    // $scope.errors.password
+    // $scope.errors.user()
+    // $scope.errors.password()
     
     // or the controller-bound preferred way
     this.error = ErrorLookup.error('group', 'full.qualified.modelname.as.written.in.ng-model');
@@ -168,7 +178,7 @@ angular
 ```
 
 `ErrorLookup.error(group, modelIdentifier, predefine)` return a function that has the following signature `function(extra)`.
-Effectively, you can trigger new errors without the error being present on the model, like when you return validation from the server, without using `model.$setValidity`, although you can.
+Effectively, you can trigger new errors without the error being present on the model, like when you return validation from the server, without using `model.$setValidity`.
 
 ```js
 $http.post('/isValid', {type: 'email', email: $scope.email}).success(function(errors){
@@ -178,21 +188,21 @@ $http.post('/isValid', {type: 'email', email: $scope.email}).success(function(er
     
     // if you assign an string, it will be shown instead of the predefined messages
     $scope.error({
-      'blacklist': 'You failed to enter your email, {{value}} even make sense to you? You dirty spammer'
+      'blacklist': 'You failed to enter your email, {{ $value }} even make sense to you? You dirty spammer'
     }); // $interpolates this on the fly, not healthy for performance, beware
   }
 });
 ```
 
-But wait! You don't need to add an string that will be interpolated, you can use a function!
+But wait! You don't need to add an string that will be interpolated, you can use a function! ...Here be dragons...
 
 ```js
 ErrorLookup.messages.add('dynamic', function(model){
   // model is the programmatically equivalent of the scope variables in your interpolated string above
   // "this" context is the internal "model" 
-  var error;
-  for(var i = 0; i < this.item.errors.length; i++) {
-    error = this.item.errors[i];
+  var error, errors = this.errors();
+  for(var i = 0; i < errors.length; i++) {
+    error = errors[i];
     if (error.type === 'required') {
       switch (this.name){
         case 'model1':
@@ -216,11 +226,11 @@ ErrorLookup.messages.add('dynamic', function(model){
 
 So let the clusterfuck ensue! Break ALL the conventions! Access ALL the models! Pass ALL elements to callbacks! Wreck ALL the declarative behavior!
 
-### API
+## API
 
-#### Provider
+### Provider
 
-###### `ErrorLookupProvider.add(name: String, expr: String|Function, trustedContext:String)`
+##### `ErrorLookupProvider.add(name: String, expr: String|Function, trustedContext:String)`
   
 Queue a message to be lazy initialized when the ErrorLookup service is instantiated for the first time.
 
@@ -229,7 +239,7 @@ ErrorLookupProvider.add('required','<strong>{{ label }}</strong> is awesome, you
 ErrorLookupProvider.add('hallelujah','praise almighty code');
 ```
 
-###### `ErrorLookupProvider.remove(name: String)`
+##### `ErrorLookupProvider.remove(name: String)`
   
 Remove a message from the queue.
 
@@ -237,16 +247,13 @@ Remove a message from the queue.
 ErrorLookupProvider.remove('required');
 ```
 
-#### Service
+### Service
 
-###### `ErrorLookup.error(group: String, name: String, predefine: Object)`
+##### `ErrorLookup.error(group: String, name: String, predefine: Object)`
   
 Returns a function so you can control the error for that field. Executing the returning function 
 returns an array with the errors (or an empty array if none). The errors are kept internally between 
 calls per model. 
-
-It's safe to assign the returning array from this, because the array always keep the
-reference to the same memory object. 
 
 ```js
 // fn is Function(Extra: Object|Boolean): Array
@@ -300,7 +307,7 @@ fn({'required':'w00t'});
 ] 
 ```
 
-###### `ErrorLookup.errors(group:String, pick:Array = [], arrays:Boolean = false, predefine:Object = {})`
+##### `ErrorLookup.errors(group: String, pick: string[], arrays: Boolean = false, predefine: Object = {})`
 
 Returns an object with all the error functions from above. If you define an array in pick, you can retrieve
 only some members of the group.
@@ -310,10 +317,10 @@ var errors = ErrorLookup.errors('group',['user','email']); // returns {'user':Er
 errors.user(); // [{type:'required'...}]
 ```
 
-setting arrays to true return the internal error arrayreference:
+setting arrays to true returns the current errors array:
 
 ```js
-var errors = ErrorLookup.errors('group',['user','email']); // returns {'user':Array,'email':Array}
+var errors = ErrorLookup.errors('group', ['user','email'], true); // returns {'user':Array,'email':Array}
 errors.user; // [{type:'required'...}]
 // the ErrorLookup.error() must be called somewhere for this array to be filled
 ```
@@ -326,7 +333,7 @@ errors.email({required: true}); // [{type:'required','message':'w00b'}]
 errors.password({required: true}); // [{type:'required','message':'w00b'}]
 ```
   
-###### `ErrorLookup.remove(group: String, name: String)`
+##### `ErrorLookup.remove(group: String, name: String)`
 
 Remove the model from the errors pile
 
@@ -334,7 +341,7 @@ Remove the model from the errors pile
 ErrorLookup.remove(scope.$id, 'user');
 ```
 
-###### `ErrorLookup.add(config:Object)`
+##### `ErrorLookup.add(config: Object)`
 
 This method is boring as hell. Long parameter list and you shouldn't need to call it manually if you use the
 directives. You need to always provide non-optional stuff everytime to the function or it breaks.
@@ -347,8 +354,7 @@ The config object is as following:
 * `config.model` : the model itself ngModelController (or ngFormController if you add a form model to it) [Not Optional]
 * `config.attrs` : the $attrs of the element, you can pass an object too when not adding from inside a directive
 * `config.group` : the group name, fallbacks to using `scope.$id`
-* `config.label` : the label to give the error. Defaults to the name of the model. pretty name for your 
-* `login.data.user` as `Your username` for example
+* `config.label` : the label to give the error. Defaults to the name of the model. pretty name for your `login.data.user` as `Your username` for example
 * `config.el`    : assign a DOM element to the current model
 
 ```js
@@ -373,7 +379,7 @@ The config object is as following:
 
 Keeps your application wide messages in a repository
 
-###### `ErrorLookup.messages.add(name: String, expr: String|Function, trustedContext: String)`
+##### `ErrorLookup.messages.add(name: String, expr: String|Function, trustedContext: String)`
   
 Adds a message. Accepts a function (callback!) or a interpolated string. If you set `trustedContext` to 'html'
 it will use the `$sce` service and accept safe HTML in your interpolated string. 
@@ -384,16 +390,16 @@ ErrorLookup.messages.add('required', '<span class="well">You need to fill this f
 
 Returns the current `$interpolate`d string or the function you passed, you can call it right way.
 
-###### `ErrorLookup.messages.remove(name: String)`
-   
+##### `ErrorLookup.messages.remove(name: String)`
+
 Remove a message from the service
   
 ```js
 ErrorLookup.messages.remove('required'); // all "required" error messages, will be silently skipped when this error is present on ngModel =(
 ```
   
-###### `ErrorLookup.messages.include(url: String)`
-   
+##### `ErrorLookup.messages.include(url: String)`
+
 Loads a JSON representation of your messages.
 Returns a promise. If you modify the resulting value, you can modify the included messages
 
@@ -403,25 +409,36 @@ ErrorLookup.messages.include('/messages.json').then(function(messages){
 });
 ```
   
-#### Directives
+### Directives
 
-The `error-lookup` directive will add any `ng-model` or `ng-form` element to the bunch. By default, `error-lookup` group elements by `scope.$id`, but you can set your own name using `error-lookup="mygroup"` (it's preferable this way, so you can reuse in your code)
+#### `error-lookup`
 
-The `error-display` is a shortcut to the `ErrorLookup.error()` function. By default, the `error-display` must be in the same scope as the `error-lookup` directive for it to inherit data from the scope, or it won't know where to look for errors. 
+The `error-lookup` directive will add any `ng-model` or `ng-form` element to the bunch. 
 
-But when you can get around this by specifying a string group name to `error-lookup`, you can pass an attribute `error-group="mygroup"`, then it knows where to look and you can reuse the same "address" in your controllers, services and other directives. 
+By default, `error-lookup` group elements by `scope.$parent.$id`, but you can set your own name using `error-lookup="mygroup"` (it's preferable this way, so you can reuse in your code and set errors from inside services and other directives)
+
+The `error-lookup-display` is a shortcut to the `ErrorLookup.error()` function. By default, the `error-lookup-display` must be in the same scope as the `error-lookup` directive for it to inherit data from the scope, or it won't know where to look for errors.
+
+But you can get around this by specifying a string group name to `error-lookup`, then you can pass an attribute `error-lookup-group="mygroup"`, then it knows where to look and you can reuse the same "address" in your controllers, services and other directives. 
 
 ```html
-<!-- add this element to our ErrorLookup service -->
-<input ng-model="some.huge.ass.model.name.thatis.your.email" error-lookup-label="your email" error-lookup="login.interface" error-lookup-name="email" type="email" required> 
+<!-- add this ngModel to our ErrorLookup service -->
+<input 
+  ng-model="model.email" 
+  error-lookup-label="your email" 
+  error-lookup="login.interface" 
+  error-lookup-name="email" 
+  type="email" 
+  required
+  > 
 <!-- You can, inside your controller, now use ErrorLookup.get('login.interface','email'), and even have access to this element lol, breaking conventions since 2014 -->
 
-<!-- Display some nasty errors to the user -->
-<ol error-display="email" error-group="login.interface">
+<!-- Display some nasty errors to the user, only from login.interface and email model -->
+<ol error-lookup-display="email" error-lookup-group="login.interface">
   <li>{{ latest.message }}</li> <!-- only the latest error in the stack -->
-  <li ng-repeat="error in errors()">{{error.message}}</li> <!-- or show ALL the errors -->
+  <li ng-repeat="error in errors() track by $id">{{error.message}}</li> <!-- or show ALL the errors -->
   <!-- you can even make your shit clickable -->
-  <li ng-repeat="error in errors()" ng-click="myWorldController.click(error)" ng-bind-html="error.message"></li> 
+  <li ng-repeat="error in errors() track by $id" ng-click="myWorldController.click(error)" ng-bind-html="error.message"></li> 
 </ol>
 
 <!-- you can put it on forms, you can display errors for your form as a whole -->
@@ -429,30 +446,61 @@ But when you can get around this by specifying a string group name to `error-loo
   <input ng-model="doh">
   <input ng-model="srsly">
   <input ng-model="input">
+  <div error-lookup-display error-lookup-template></div> <!-- show all errors for all form models on one place -->
 </form>
 ```
 
-The `error-display` directive has 2 scope variables: 
+The `error-lookup-display` directive has the following scope variables: 
 
-###### `latest`
+##### `$model: IErrorHelper;`
+
+The ErrorLookup model
+
+##### `$errorCount: number;`
+
+Current error count
+
+##### `$first: IErrorMessage;`
+
+Is first error for that field, containing the fields described in [ErrorLookup.error()](#errorlookuperrorgroup-string-name-string-predefine-object)
+
+##### `$latest: IErrorMessage;`
 
 Is the top most error for that field, containing the fields described in [ErrorLookup.error()](#errorlookuperrorgroup-string-name-string-predefine-object)
 
-###### `errors`
+##### `$errors: any[];`
 
-Is the function of all errors on the current model / form, in the format, you can override messages in here as you would in `ErrorLookup.error()({required:'holy mother of code'})`:
+Current cached array of errors
+
+##### `$hasChanged(): boolean;`
+
+If the field has errors AND is `$dirty` AND has been `$touched`
+
+N.B: Since the scope isn't isolated, but a child scope, it inherits from the current scope it's in, make sure to understand scope inheritance before you try your hax0rs in the code. 
+
+##### `$latestHtml: angular.IAugmentedJQuery;`
+
+The `$sce.trustAsHtml` version of `$latest`
+
+##### `$firstHtml: angular.IAugmentedJQuery;`
+
+The `$sce.trustAsHtml` version of `$first`
+
+#### `error-lookup-template`
+
+This directive creates a `ul` with a default limit of 15 items for errors. It needs to be applied in the same element that has `error-lookup-display` on it.
 
 ```html
-<ol error-display="email" error-group="login.interface">
-  <li ng-repeat="error in errors({'required':'holy mother of code'})">{{error.label}}: {{ error.message }}</li>
-</ol>
+<div error-lookup-display="models.email" error-lookup-template="{filter: 'generic', limit: 1}">
+  <!-- setting `filter` will only show `generic` error messages -->
+  <!-- setting `limit` will limit the number of messages displayed at once -->
+  <!-- both options are optional, they default to none and 15 respectively -->
+</div>
 ```
 
-Since the scope isn't isolated, but a child scope, it inherits from the current scope it's in, make sure to understand scope inheritance before you try your hax0rs in the code. 
+### Filter
 
-#### Filter
-
-Along with the `error-display` directive, you can return all the messages only by using the filter `errorMessages`:
+It's used to filter error messages from a bunch of items in an array, used by the `error-lookup-template` directive:
 
 ```html
 <div error-display="name">
