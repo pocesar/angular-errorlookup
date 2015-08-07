@@ -7,7 +7,7 @@ module.exports = function (config){
     files         : [
       'bower_components/angular/angular.js',
       'bower_components/angular-mocks/angular-mocks.js',
-      'bower_components/expect/index.js',
+      'bower_components/chai/index.js',
       'angular-errorlookup.js',
       'test/test.js'
     ],
