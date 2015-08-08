@@ -1,6 +1,6 @@
 {
   "name":"angular-errorlookup",
-  "version":"0.1.1",
+  "version":"0.2.0",
   "description": "Because AngularJS general error messages still suck. ngMessages can kiss my ass.",
   "main": "./angular-lookup.js",
   "license": "MIT",
