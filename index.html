@@ -31,6 +31,13 @@
 <p>Made for Angular 1.4+, made in sexy Typescript</p>
 
 <h2>
+<a id="install" class="anchor" href="#install" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install</h2>
+
+<div class="highlight highlight-bash"><pre>$ bower install angular-errorlookup</pre></div>
+
+<p>Has jQuery and lodash as dependencies</p>
+
+<h2>
 <a id="motivation" class="anchor" href="#motivation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Motivation</h2>
 
 <p>How is it better than <code>ngMessage</code> / <code>ngMessages</code>? Or plain old <code>ng-switch-when</code> / <code>ng-if</code> directive and a bunch of divs?</p>
@@ -149,6 +156,9 @@ wanting it to.</p>
   });
 }]);</pre></div>
 
+<h3>
+<a id="locals-for-usage-in-message-strings" class="anchor" href="#locals-for-usage-in-message-strings" aria-hidden="true"><span class="octicon octicon-link"></span></a>Locals for usage in message strings</h3>
+
 <p>But that's only for adding and manually setting error messages, which isn't much different from
 adding stuff to your controllers. We want moar.</p>
 
@@ -169,6 +179,18 @@ adding stuff to your controllers. We want moar.</p>
 value of <code>ng-model</code></p>
 
 <h5>
+<a id="-form-" class="anchor" href="#-form-" aria-hidden="true"><span class="octicon octicon-link"></span></a><code>{{ $form }}</code>
+</h5>
+
+<p>This will only be available if it's triggered using <code>error-lookup-form</code>.</p>
+
+<h5>
+<a id="-name-" class="anchor" href="#-name-" aria-hidden="true"><span class="octicon octicon-link"></span></a><code>{{ $name }}</code>
+</h5>
+
+<p>The $name is the assigned name using <code>error-lookup-name</code>, <code>name</code> or <code>ng-model</code> attributes.</p>
+
+<h5>
 <a id="-attrs-" class="anchor" href="#-attrs-" aria-hidden="true"><span class="octicon octicon-link"></span></a><code>{{ $attrs }}</code>
 </h5>
 
@@ -179,7 +201,7 @@ You can even add CSS classes to the element through here, omg messy spaghetti!</
 <a id="-value-" class="anchor" href="#-value-" aria-hidden="true"><span class="octicon octicon-link"></span></a><code>{{ $value }}</code>
 </h5>
 
-<p>Alias for the current model $viewValue</p>
+<p>Alias for the current model <code>$viewValue</code>. If you want the <code>$modelValue</code> use <code>$model.$modelValue</code>.</p>
 
 <h5>
 <a id="-scope-" class="anchor" href="#-scope-" aria-hidden="true"><span class="octicon octicon-link"></span></a><code>{{ $scope }}</code>
@@ -247,24 +269,10 @@ Effectively, you can trigger new errors without the error being present on the m
 <div class="highlight highlight-js"><pre>ErrorLookup.messages.<span class="pl-c1">add</span>(<span class="pl-s"><span class="pl-pds">'</span>dynamic<span class="pl-pds">'</span></span>, <span class="pl-k">function</span>(<span class="pl-smi">model</span>){
   <span class="pl-c">// model is the programmatically equivalent of the scope variables in your interpolated string above</span>
   <span class="pl-c">// "this" context is the internal "model"</span>
-  <span class="pl-k">var</span> error, errors <span class="pl-k">=</span> <span class="pl-v">this</span>.errors();
-  <span class="pl-k">for</span>(<span class="pl-k">var</span> i <span class="pl-k">=</span> <span class="pl-c1">0</span>; i <span class="pl-k">&lt;</span> errors.<span class="pl-c1">length</span>; i<span class="pl-k">++</span>) {
-    error <span class="pl-k">=</span> errors[i];
-    <span class="pl-k">if</span> (error.<span class="pl-c1">type</span> <span class="pl-k">===</span> <span class="pl-s"><span class="pl-pds">'</span>required<span class="pl-pds">'</span></span>) {
-      <span class="pl-k">switch</span> (<span class="pl-v">this</span>.<span class="pl-c1">name</span>){
-        <span class="pl-k">case</span> <span class="pl-s"><span class="pl-pds">'</span>model1<span class="pl-pds">'</span></span><span class="pl-k">:</span>
-          <span class="pl-k">return</span> <span class="pl-s"><span class="pl-pds">'</span>reqqqq<span class="pl-pds">'</span></span>;
-        <span class="pl-k">case</span> <span class="pl-s"><span class="pl-pds">'</span>model2<span class="pl-pds">'</span></span><span class="pl-k">:</span>
-          <span class="pl-k">return</span> <span class="pl-s"><span class="pl-pds">'</span>reqirueiruei<span class="pl-pds">'</span></span>;
-      }
-    } <span class="pl-k">else</span> <span class="pl-k">if</span> (error.<span class="pl-c1">type</span> <span class="pl-k">===</span> <span class="pl-s"><span class="pl-pds">'</span>email<span class="pl-pds">'</span></span>) {
-      <span class="pl-k">switch</span> (<span class="pl-v">this</span>.<span class="pl-c1">name</span>){
-        <span class="pl-k">case</span> <span class="pl-s"><span class="pl-pds">'</span>model1<span class="pl-pds">'</span></span><span class="pl-k">:</span>
-          <span class="pl-k">return</span> <span class="pl-s"><span class="pl-pds">'</span>Dubudbudubu<span class="pl-pds">'</span></span>;
-        <span class="pl-k">case</span> <span class="pl-s"><span class="pl-pds">'</span>model2<span class="pl-pds">'</span></span><span class="pl-k">:</span>
-          <span class="pl-k">return</span> <span class="pl-s"><span class="pl-pds">'</span>Wooobblebblle<span class="pl-pds">'</span></span>;
-      }
-    }
+  <span class="pl-k">if</span> (model.$group <span class="pl-k">===</span> <span class="pl-s"><span class="pl-pds">'</span>login<span class="pl-pds">'</span></span>) {
+      <span class="pl-k">return</span> <span class="pl-s"><span class="pl-pds">'</span>Login failed<span class="pl-pds">'</span></span>;
+  } <span class="pl-k">else</span> <span class="pl-k">if</span> (model.$group <span class="pl-k">===</span> <span class="pl-s"><span class="pl-pds">'</span>another<span class="pl-pds">'</span></span>) {
+      <span class="pl-k">return</span> <span class="pl-s"><span class="pl-pds">'</span>Some shit happened<span class="pl-pds">'</span></span>;
   }
   <span class="pl-c">// You must return an string here. Interpolate if you want, ErrorLookup don't care</span>
   <span class="pl-k">return</span> <span class="pl-s"><span class="pl-pds">'</span>You failed<span class="pl-pds">'</span></span>;
@@ -297,6 +305,89 @@ ErrorLookupProvider.<span class="pl-c1">add</span>(<span class="pl-s"><span clas
 
 <h3>
 <a id="service" class="anchor" href="#service" aria-hidden="true"><span class="octicon octicon-link"></span></a>Service</h3>
+
+<h4>
+<a id="errorlookuptranslatemessage-string-function" class="anchor" href="#errorlookuptranslatemessage-string-function" aria-hidden="true"><span class="octicon octicon-link"></span></a>ErrorLookup.translate(message: string): Function;</h4>
+
+<p>Returns the interpolated function, shortcut for <code>this.messages[message]</code>.
+Throws if not defined</p>
+
+<div class="highlight highlight-js"><pre>ErrorLookup.translate(<span class="pl-s"><span class="pl-pds">'</span>notrequired<span class="pl-pds">'</span></span>); <span class="pl-c">// throws</span></pre></div>
+
+<h4>
+<a id="errorlookupvaliditygroup-string-name-string-defs--qpromise" class="anchor" href="#errorlookupvaliditygroup-string-name-string-defs--qpromise" aria-hidden="true"><span class="octicon octicon-link"></span></a>ErrorLookup.validity(group: string, name: string, defs: {}): QPromise;</h4>
+
+<p>Calls <code>$setValidity</code> in the underlaying ngModel manually. Does nothing for forms.</p>
+
+<div class="highlight highlight-js"><pre>ErrorLookup.validity(<span class="pl-s"><span class="pl-pds">'</span>group<span class="pl-pds">'</span></span>,<span class="pl-s"><span class="pl-pds">'</span>name<span class="pl-pds">'</span></span>, {
+    required<span class="pl-k">:</span> <span class="pl-c1">false</span>,
+    email<span class="pl-k">:</span> <span class="pl-c1">true</span>
+}).then(<span class="pl-k">function</span>(<span class="pl-smi">errors</span>){
+    <span class="pl-c">// errors = array</span>
+});</pre></div>
+
+<h4>
+<a id="errorlookupvalidategroup-string-name-string-qpromise" class="anchor" href="#errorlookupvalidategroup-string-name-string-qpromise" aria-hidden="true"><span class="octicon octicon-link"></span></a>ErrorLookup.validate(group: string, name: string): QPromise;</h4>
+
+<p>Calls <code>$validate</code> in the underlaying ngModel manually. If it's a form, it calls <code>$validate()</code> in all
+the children.</p>
+
+<div class="highlight highlight-js"><pre>ErrorLookup.validate(<span class="pl-s"><span class="pl-pds">'</span>group<span class="pl-pds">'</span></span>,<span class="pl-s"><span class="pl-pds">'</span>name<span class="pl-pds">'</span></span>);
+<span class="pl-c">// calls ngModel.$validate();</span></pre></div>
+
+<h4>
+<a id="errorlookuperrorsgroup-string-pick-string-errorarrays-boolean--false-predefine--helpers-boolean--true-reset-boolean--true-" class="anchor" href="#errorlookuperrorsgroup-string-pick-string-errorarrays-boolean--false-predefine--helpers-boolean--true-reset-boolean--true-" aria-hidden="true"><span class="octicon octicon-link"></span></a>ErrorLookup.errors(group: string, pick?: string[], errorArrays: boolean = false, predefine: {}, helpers: boolean = true, reset: boolean = true): {};</h4>
+
+<p>Bread and butter, returns an object with all the error messages helpers for a group, or you can pick some manually</p>
+
+<h4>
+<a id="errorlookupresetgroup-string-name-string-pick-string-qpromise" class="anchor" href="#errorlookupresetgroup-string-name-string-pick-string-qpromise" aria-hidden="true"><span class="octicon octicon-link"></span></a>ErrorLookup.reset(group: string, name: string, pick: string[]): QPromise;</h4>
+
+<p>Reset forced errors set using <code>ErrorLookup.set()</code> function</p>
+
+<h4>
+<a id="errorlookupsetgroup-string-name-string-errors--reset-boolean--true-qpromise" class="anchor" href="#errorlookupsetgroup-string-name-string-errors--reset-boolean--true-qpromise" aria-hidden="true"><span class="octicon octicon-link"></span></a>ErrorLookup.set(group: string, name: string, errors: {}, reset: boolean = true): QPromise;</h4>
+
+<p>Set programatically an error and return a promise with the updated errors array.
+Resets the errors if you specify, sets the model to dirty, and the form to dirty, then forcefully set the errors without updating the <code>ngModel.$errors</code>.
+It's a sticky but superficial error, that isn't attached to the ngModel itself.
+Usually good to show error forms that come from the server, or manually set errors on inputs without actually making them invalid.</p>
+
+<div class="highlight highlight-js"><pre>ErrorLookup.set(<span class="pl-s"><span class="pl-pds">'</span>group<span class="pl-pds">'</span></span>,<span class="pl-s"><span class="pl-pds">'</span>name<span class="pl-pds">'</span></span>, {
+    registered<span class="pl-k">:</span> <span class="pl-c1">true</span>, <span class="pl-c">// use the default registered error</span>
+    domain<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>Domain is invalid<span class="pl-pds">'</span></span> <span class="pl-c">// override the default message</span>
+}, <span class="pl-c1">true</span>);</pre></div>
+
+<h4>
+<a id="errorlookupgetgroup-string-name-string---helpers--false-predefined-boolean--false-ierrorhelper" class="anchor" href="#errorlookupgetgroup-string-name-string---helpers--false-predefined-boolean--false-ierrorhelper" aria-hidden="true"><span class="octicon octicon-link"></span></a>ErrorLookup.get(group: string, name: string = '', helpers = false, predefined: boolean = false): IErrorHelper;</h4>
+
+<p>Return either the whole group, a model, or helpers to save some calls to <code>ErrorLookup.item</code>,
+<code>ErrorLookup.error</code>, <code>ErrorLookup.set</code>, <code>ErrorLookup.label</code>, etc</p>
+
+<div class="highlight highlight-js"><pre><span class="pl-k">var</span> group <span class="pl-k">=</span> ErrorLookup.get(<span class="pl-s"><span class="pl-pds">'</span>group<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>helper<span class="pl-pds">'</span></span>, <span class="pl-c1">true</span>);
+<span class="pl-c">/*</span>
+<span class="pl-c">returns</span>
+<span class="pl-c">{</span>
+<span class="pl-c">    item: groupHelperModel,</span>
+<span class="pl-c">    error: Function,</span>
+<span class="pl-c">    set: (error: any),</span>
+<span class="pl-c">    label: (item: string, name: string),</span>
+<span class="pl-c">    reset: (pick: string[]),</span>
+<span class="pl-c">    validity: (validity: any  = {}),</span>
+<span class="pl-c">    remove: ()</span>
+<span class="pl-c">}</span>
+<span class="pl-c">*/</span></pre></div>
+
+<h5>
+<a id="errorlookuplabelgroup-string-name-string-label-string---this" class="anchor" href="#errorlookuplabelgroup-string-name-string-label-string---this" aria-hidden="true"><span class="octicon octicon-link"></span></a>ErrorLookup.label(group: string, name: string|{}, label: string = ''): this;</h5>
+
+<p>Set a pretty name for a model, can set many labels at once if you pass an object to the name.</p>
+
+<div class="highlight highlight-typescript"><pre>ErrorLookup.<span class="pl-c1">label</span>(<span class="pl-s"><span class="pl-pds">'</span>somegroup<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>login.data.name<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Login user<span class="pl-pds">'</span></span>);
+ErrorLookup.<span class="pl-c1">label</span>(<span class="pl-s"><span class="pl-pds">'</span>somegroup<span class="pl-pds">'</span></span>, {
+    <span class="pl-s"><span class="pl-pds">'</span>login.data.name<span class="pl-pds">'</span></span>: <span class="pl-s"><span class="pl-pds">'</span>Login user<span class="pl-pds">'</span></span>,
+    <span class="pl-s"><span class="pl-pds">'</span>login.data.pass<span class="pl-pds">'</span></span>: <span class="pl-s"><span class="pl-pds">'</span>Password<span class="pl-pds">'</span></span>
+});</pre></div>
 
 <h5>
 <a id="errorlookuperrorgroup-string-name-string-predefine-object" class="anchor" href="#errorlookuperrorgroup-string-name-string-predefine-object" aria-hidden="true"><span class="octicon octicon-link"></span></a><code>ErrorLookup.error(group: String, name: String, predefine: Object)</code>
@@ -380,7 +471,8 @@ errors.password({required<span class="pl-k">:</span> <span class="pl-c1">true</s
 
 <p>Remove the model from the errors pile</p>
 
-<div class="highlight highlight-js"><pre>ErrorLookup.remove(scope.$id, <span class="pl-s"><span class="pl-pds">'</span>user<span class="pl-pds">'</span></span>);</pre></div>
+<div class="highlight highlight-js"><pre>ErrorLookup.remove(scope.$id, <span class="pl-s"><span class="pl-pds">'</span>user<span class="pl-pds">'</span></span>);
+ErrorLookup.remove(<span class="pl-s"><span class="pl-pds">'</span>whole group<span class="pl-pds">'</span></span>); <span class="pl-c">// warning, remove the entire group</span></pre></div>
 
 <h5>
 <a id="errorlookupaddconfig-object" class="anchor" href="#errorlookupaddconfig-object" aria-hidden="true"><span class="octicon octicon-link"></span></a><code>ErrorLookup.add(config: Object)</code>
@@ -393,20 +485,23 @@ directives. You need to always provide non-optional stuff everytime to the funct
 
 <ul>
 <li>
-<code>config.scope</code> : the scope. [Not Optional]</li>
+<code>config.scope</code>      : the current scope. [Not Optional]</li>
 <li>
-<code>config.name</code>  : the name of the ng-model, or any internal name you want to use. it must exist in the given scope [Not Optional]</li>
+<code>config.name</code>       : the name of the ng-model, or any internal name you want to use. it must exist in the given scope [Not Optional]</li>
 <li>
-<code>config.model</code> : the model itself ngModelController (or ngFormController if you add a form model to it) [Not Optional]</li>
+<code>config.el</code>         : assign a DOM element to the current model [Not optional]</li>
 <li>
-<code>config.attrs</code> : the $attrs of the element, you can pass an object too when not adding from inside a directive</li>
+<code>config.group</code>      : the group name [Not optional]</li>
 <li>
-<code>config.group</code> : the group name, fallbacks to using <code>scope.$id</code>
-</li>
+<code>config.controller</code> : the model itself ngModelController (or ngFormController if you add a form model to it) [Not Optional]</li>
 <li>
-<code>config.label</code> : the label to give the error. Defaults to the name of the model. pretty name for your <code>login.data.user</code> as <code>Your username</code> for example</li>
+<code>config.isForm</code>     : is the current controller FormController?</li>
 <li>
-<code>config.el</code>    : assign a DOM element to the current model</li>
+<code>config.attrs</code>      : the $attrs of the element, you can pass an object too when not adding from inside a directive</li>
+<li>
+<code>config.label</code>      : the label to give the error. Defaults to the name of the model. pretty name for your <code>login.data.user</code> as <code>Your username</code> for example</li>
+<li>
+<code>config.parent</code>     : set another ErrorLookup model as parent (not controllers!)</li>
 </ul>
 
 <div class="highlight highlight-js"><pre><span class="pl-c">/* ... */</span>
@@ -416,10 +511,11 @@ directives. You need to always provide non-optional stuff everytime to the funct
     <span class="pl-en">link</span><span class="pl-k">:</span> <span class="pl-k">function</span>(<span class="pl-smi">$scope</span>, <span class="pl-smi">el</span>, <span class="pl-smi">attr</span>, <span class="pl-smi">ctrl</span>){
 
       ErrorLookup.<span class="pl-c1">add</span>({
-        scope<span class="pl-k">:</span> $scope,
-        name <span class="pl-k">:</span> attr.ngModel,
-        model<span class="pl-k">:</span> ctrl,
-        el   <span class="pl-k">:</span> el
+        scope      <span class="pl-k">:</span> $scope,
+        group      <span class="pl-k">:</span> $scope.$id,
+        name       <span class="pl-k">:</span> attr.ngModel,
+        controller <span class="pl-k">:</span> ctrl,
+        el         <span class="pl-k">:</span> el
       });
     }
   }
@@ -490,7 +586,7 @@ in this order.</p>
   &gt;
 
 <span class="pl-c">&lt;!-- error-lookup-label changes the $label variable --&gt;</span>
-<span class="pl-c">&lt;!-- error-lookup-name overrides your ng-model --&gt;</span>
+<span class="pl-c">&lt;!-- error-lookup-name overrides your ng-model and name attributes --&gt;</span>
 
 <span class="pl-c">&lt;!-- You can, inside your controller, now use</span>
 <span class="pl-c">     ErrorLookup.get('login.interface','email'), and</span>
