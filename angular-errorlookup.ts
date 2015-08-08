@@ -1,3 +1,5 @@
+/// <reference path="typings/tsd.d.ts" />
+
 'use strict';
 
 export interface IFilterFunction {
@@ -74,6 +76,7 @@ export interface IErrorModel {
     controller: angular.INgModelController;
     isForm: boolean;
     scope: angular.IScope;
+    group: string;
     state: {
         manual: boolean;
         reset: IList<Boolean>;
@@ -100,7 +103,7 @@ export interface IErrorGetterSetter {
     (extra?: boolean): IErrorMessage[];
 }
 
-class ErrorLookupError implements Error {
+export class ErrorLookupError implements Error {
     name: string;
     message: string;
     stack: any;
@@ -124,6 +127,10 @@ ErrorLookupError.prototype = Object.create(Error.prototype, {
 
 function viewChangeListener(model: IErrorModel) {
     var skip: boolean, controller:angular.INgModelController;
+
+    if (!controller || !controller.$viewChangeListeners) {
+        return;
+    }
 
     controller = model.controller;
 
@@ -295,7 +302,9 @@ export module Services {
             customMessages = !_.isEmpty(predefine) && _.isPlainObject(predefine);
 
             var modelByDefinition = (model: angular.INgModelController) => {
-                return _.find(repo.models, (m) => m.controller === model) || model;
+                return _.find(repo.models, (m) => {
+                    return m.controller === model;
+                });
             };
 
             var predefined = (key: string, model?: IErrorModel): Boolean|Function => {
@@ -348,6 +357,7 @@ export module Services {
                     obj.message = fn.call(obj, {
                         $label: label,
                         $name: name,
+                        $group: model.group,
                         $model: model.controller,
                         $attrs: model.attrs,
                         $value: model.controller.$viewValue,
@@ -360,6 +370,7 @@ export module Services {
             };
 
             return (extra?: any) => {
+
                 if (!model || model.destroyed || !model.controller) {
                     if (_.isArray(model.errors)) {
                         return model.errors;
@@ -412,7 +423,7 @@ export module Services {
                                     id: this.incrementalId++,
                                     type: key,
                                     item: model,
-                                    name: findName(e, true),
+                                    name: fromModel(e, '$name') || frm,
                                     label: label || frm,
                                     message: void 0
                                 };
@@ -420,6 +431,7 @@ export module Services {
                                 obj.message = fn.call(obj, {
                                     $label: label,
                                     $model: fromModel(e),
+                                    $group: e.group || model.group || group,
                                     $name: e.name || fromModel(e, '$name'),
                                     $attrs: e.attrs,
                                     $form: model.controller,
@@ -735,7 +747,7 @@ export module Services {
                 throw new ErrorLookupError('ErrorLookup.add missing non optional configurations: scope, name and controller');
             }
 
-            repoName = options.group;
+            repoName = options.group || options.scope.$id.toString();
 
             var currentRepo: IErrorModels = this.repository[repoName];
 
@@ -761,6 +773,7 @@ export module Services {
                     reset: {}
                 },
                 destroyed: false,
+                group: repoName,
                 parent: options.parent,
                 children: {},
                 name: options.name,
@@ -783,9 +796,11 @@ export module Services {
                     }
                     return this;
                 },
-                helpers: this.get(repoName, options.name, true),
+                helpers: null,
                 forced: {}
             };
+
+            currentModel.helpers = this.get(repoName, options.name, true);
 
             if (!isForm) {
                 viewChangeListener(currentModel);
@@ -854,7 +869,8 @@ export module Services {
             public $interpolate: angular.IInterpolateService,
             public $q: angular.IQService,
             $http: angular.IHttpService,
-            public $timeout: angular.ITimeoutService
+            public $timeout: angular.ITimeoutService,
+            Provider: Providers.ErrorLookupProvider
         ){
             this.emptyInterpolated = $interpolate('');
 
@@ -910,21 +926,22 @@ export module Services {
                 }
             };
 
-            for (var key in Providers.ErrorLookupProvider.messageQueue) {
-                this.messages.add(key, Providers.ErrorLookupProvider.messageQueue[key]);
+            for (var key in Provider.messageQueue) {
+                this.messages.add(key, Provider.messageQueue[key]);
             }
         }
 
         static $inject = ['$interpolate', '$q', '$http', '$timeout'];
 
         static instance(
+            Provider: Providers.ErrorLookupProvider,
             $interpolate: angular.IInterpolateService,
             $q: angular.IQService,
             $http: angular.IHttpService,
             $timeout: angular.ITimeoutService
         ){
 
-            return new ErrorLookup($interpolate, $q, $http, $timeout);
+            return new ErrorLookup($interpolate, $q, $http, $timeout, Provider);
         }
     }
 }
@@ -933,7 +950,7 @@ export module Providers {
 
     export class ErrorLookupProvider {
 
-        public static messageQueue: IList<string> = {
+        public messageQueue: IList<string> = {
             required: 'You must fill{{ $label ? " " + $label : " this field" }}',
             email: '{{ $value ? $value : "This" }} is not a valid email',
             pattern: 'Please provide a valid format',
@@ -943,7 +960,9 @@ export module Providers {
             max: 'The maximum value allowed is {{ $attrs.max }}'
         };
 
-        public $get = [].concat(Services.ErrorLookup.$inject, Services.ErrorLookup.instance);
+        public $get = [].concat(Services.ErrorLookup.$inject, (...args: any[]) => {
+            return Services.ErrorLookup.instance.apply(null, [this].concat(args));
+        });
 
         /**
          * Add a message to be lazy-loaded
@@ -956,7 +975,7 @@ export module Providers {
                     this.add(k, m);
                 });
             } else {
-                ErrorLookupProvider.messageQueue[name] = expr;
+                this.messageQueue[name] = expr;
             }
             return this;
         }
@@ -970,12 +989,16 @@ export module Providers {
          * Remove a message so it won't be initialized when ErrorLookup gets injected
          */
         remove(name: string): ErrorLookupProvider {
-            delete ErrorLookupProvider.messageQueue[name];
+            delete this.messageQueue[name];
             return this;
+        }
+
+        static instance() {
+            return [() => new this];
         }
     }
 
-    export var ErrorLookup = new ErrorLookupProvider;
+
 }
 
 export interface IErrorLookupFormController {
@@ -1046,7 +1069,12 @@ module Directives {
             };
 
             this.link = {
-                post:  (scope, el ,attrs, ctrls) => {
+                post:  (
+                    scope: angular.IScope,
+                    el: angular.IAugmentedJQuery,
+                    attrs: angular.IAttributes,
+                    ctrls: any[]
+                    ) => {
                     var error: IErrorModel;
                     var group: string;
                     var label: string;
@@ -1108,7 +1136,7 @@ module Directives {
         constructor(ErrorLookup: Services.ErrorLookup) {
 
             this.link = {
-                post:  (scope, el, attrs, ctrls) => {
+                post:  (scope: angular.IScope, el: angular.IAugmentedJQuery, attrs: angular.IAttributes, ctrls: any[]) => {
                     var error: IErrorModel;
                     var group: string;
                     var label: string;
@@ -1386,7 +1414,7 @@ module Filters {
 
 angular
 .module('ngErrorLookup', [])
-.provider(Providers)
+.provider('ErrorLookup', Providers.ErrorLookupProvider.instance())
 .directive(Directives)
 .filter(Filters)
 ;

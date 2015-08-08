@@ -9,6 +9,14 @@ TL;DR http://pocesar.github.io/angular-errorlookup
 
 Made for Angular 1.4+, made in sexy Typescript
 
+## Install
+
+```bash
+$ bower install angular-errorlookup
+```
+
+Has jQuery and lodash as dependencies
+
 ## Motivation
 
 How is it better than `ngMessage` / `ngMessages`? Or plain old `ng-switch-when` / `ng-if` directive and a bunch of divs?
@@ -131,6 +139,8 @@ angular
 }]);
 ```
 
+### Locals for usage in message strings
+
 But that's only for adding and manually setting error messages, which isn't much different from
 adding stuff to your controllers. We want moar.
 
@@ -146,6 +156,14 @@ Pretty name of the model, instead of displaying "login.data.user.email" to the u
 The ngModel itself with all the bells and whistles, unchanged. On the directive, it's the
 value of `ng-model`
 
+##### `{{ $form }}`
+
+This will only be available if it's triggered using `error-lookup-form`.
+
+##### `{{ $name }}`
+
+The $name is the assigned name using `error-lookup-name`, `name` or `ng-model` attributes.
+
 ##### `{{ $attrs }}`
 
 The $attrs from the current element with all the bells and whistles, unchanged
@@ -153,7 +171,7 @@ You can even add CSS classes to the element through here, omg messy spaghetti!
 
 ##### `{{ $value }}`
 
-Alias for the current model $viewValue
+Alias for the current model `$viewValue`. If you want the `$modelValue` use `$model.$modelValue`.
 
 ##### `{{ $scope }}`
 
@@ -222,24 +240,10 @@ But wait! You don't need to add an string that will be interpolated, you can use
 ErrorLookup.messages.add('dynamic', function(model){
   // model is the programmatically equivalent of the scope variables in your interpolated string above
   // "this" context is the internal "model"
-  var error, errors = this.errors();
-  for(var i = 0; i < errors.length; i++) {
-    error = errors[i];
-    if (error.type === 'required') {
-      switch (this.name){
-        case 'model1':
-          return 'reqqqq';
-        case 'model2':
-          return 'reqirueiruei';
-      }
-    } else if (error.type === 'email') {
-      switch (this.name){
-        case 'model1':
-          return 'Dubudbudubu';
-        case 'model2':
-          return 'Wooobblebblle';
-      }
-    }
+  if (model.$group === 'login') {
+      return 'Login failed';
+  } else if (model.$group === 'another') {
+      return 'Some shit happened';
   }
   // You must return an string here. Interpolate if you want, ErrorLookup don't care
   return 'You failed';
@@ -270,6 +274,94 @@ ErrorLookupProvider.remove('required');
 ```
 
 ### Service
+
+
+#### ErrorLookup.translate(message: string): Function;
+
+Returns the interpolated function, shortcut for `this.messages[message]`.
+Throws if not defined
+
+```js
+ErrorLookup.translate('notrequired'); // throws
+```
+
+#### ErrorLookup.validity(group: string, name: string, defs: {}): QPromise<Errors[]>;
+
+Calls `$setValidity` in the underlaying ngModel manually. Does nothing for forms.
+
+```js
+ErrorLookup.validity('group','name', {
+    required: false,
+    email: true
+}).then(function(errors){
+    // errors = array
+});
+```
+
+#### ErrorLookup.validate(group: string, name: string): QPromise<Errors[]>;
+
+Calls `$validate` in the underlaying ngModel manually. If it's a form, it calls `$validate()` in all
+the children.
+
+```js
+ErrorLookup.validate('group','name');
+// calls ngModel.$validate();
+```
+
+#### ErrorLookup.errors(group: string, pick?: string[], errorArrays: boolean = false, predefine: {}, helpers: boolean = true, reset: boolean = true): {};
+
+Bread and butter, returns an object with all the error messages helpers for a group, or you can pick some manually
+
+#### ErrorLookup.reset(group: string, name: string, pick: string[]): QPromise<Errors[]>;
+
+Reset forced errors set using `ErrorLookup.set()` function
+
+#### ErrorLookup.set(group: string, name: string, errors: {}, reset: boolean = true): QPromise<Errors[]>;
+
+Set programatically an error and return a promise with the updated errors array.
+Resets the errors if you specify, sets the model to dirty, and the form to dirty, then forcefully set the errors without updating the `ngModel.$errors`.
+It's a sticky but superficial error, that isn't attached to the ngModel itself.
+Usually good to show error forms that come from the server, or manually set errors on inputs without actually making them invalid.
+
+```js
+ErrorLookup.set('group','name', {
+    registered: true, // use the default registered error
+    domain: 'Domain is invalid' // override the default message
+}, true);
+```
+
+#### ErrorLookup.get(group: string, name: string = '', helpers = false, predefined: boolean = false): IErrorHelper;
+
+Return either the whole group, a model, or helpers to save some calls to `ErrorLookup.item`,
+`ErrorLookup.error`, `ErrorLookup.set`, `ErrorLookup.label`, etc
+
+```js
+var group = ErrorLookup.get('group', 'helper', true);
+/*
+returns
+{
+    item: groupHelperModel,
+    error: Function,
+    set: (error: any),
+    label: (item: string, name: string),
+    reset: (pick: string[]),
+    validity: (validity: any  = {}),
+    remove: ()
+}
+*/
+```
+
+##### ErrorLookup.label(group: string, name: string|{}, label: string = ''): this;
+
+Set a pretty name for a model, can set many labels at once if you pass an object to the name.
+
+```typescript
+ErrorLookup.label('somegroup', 'login.data.name', 'Login user');
+ErrorLookup.label('somegroup', {
+    'login.data.name': 'Login user',
+    'login.data.pass': 'Password'
+});
+```
 
 ##### `ErrorLookup.error(group: String, name: String, predefine: Object)`
 
@@ -361,6 +453,7 @@ Remove the model from the errors pile
 
 ```js
 ErrorLookup.remove(scope.$id, 'user');
+ErrorLookup.remove('whole group'); // warning, remove the entire group
 ```
 
 ##### `ErrorLookup.add(config: Object)`
@@ -370,14 +463,15 @@ directives. You need to always provide non-optional stuff everytime to the funct
 
 The config object is as following:
 
-
-* `config.scope` : the scope. [Not Optional]
-* `config.name`  : the name of the ng-model, or any internal name you want to use. it must exist in the given scope [Not Optional]
-* `config.model` : the model itself ngModelController (or ngFormController if you add a form model to it) [Not Optional]
-* `config.attrs` : the $attrs of the element, you can pass an object too when not adding from inside a directive
-* `config.group` : the group name, fallbacks to using `scope.$id`
-* `config.label` : the label to give the error. Defaults to the name of the model. pretty name for your `login.data.user` as `Your username` for example
-* `config.el`    : assign a DOM element to the current model
+* `config.scope`      : the current scope. [Not Optional]
+* `config.name`       : the name of the ng-model, or any internal name you want to use. it must exist in the given scope [Not Optional]
+* `config.el`         : assign a DOM element to the current model [Not optional]
+* `config.group`      : the group name [Not optional]
+* `config.controller` : the model itself ngModelController (or ngFormController if you add a form model to it) [Not Optional]
+* `config.isForm`     : is the current controller FormController?
+* `config.attrs`      : the $attrs of the element, you can pass an object too when not adding from inside a directive
+* `config.label`      : the label to give the error. Defaults to the name of the model. pretty name for your `login.data.user` as `Your username` for example
+* `config.parent`     : set another ErrorLookup model as parent (not controllers!)
 
 ```js
 /* ... */
@@ -387,10 +481,11 @@ The config object is as following:
     link: function($scope, el, attr, ctrl){
 
       ErrorLookup.add({
-        scope: $scope,
-        name : attr.ngModel,
-        model: ctrl,
-        el   : el
+        scope      : $scope,
+        group      : $scope.$id,
+        name       : attr.ngModel,
+        controller : ctrl,
+        el         : el
       });
     }
   }
@@ -458,7 +553,7 @@ in this order.
   >
 
 <!-- error-lookup-label changes the $label variable -->
-<!-- error-lookup-name overrides your ng-model -->
+<!-- error-lookup-name overrides your ng-model and name attributes -->
 
 <!-- You can, inside your controller, now use
      ErrorLookup.get('login.interface','email'), and

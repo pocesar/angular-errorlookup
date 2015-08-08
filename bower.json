@@ -1,6 +1,6 @@
 {
   "name": "angular-errorlookup",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Because AngularJS general error messages still suck. ngMessages can kiss my ass.",
   "main": "./angular-lookup.js",
   "ignore": [
@@ -14,7 +14,9 @@
     "tsd.json"
   ],
   "dependencies": {
-    "angular": ">=1.3||<1.5"
+    "angular": ">=1.3||<1.5",
+    "lodash": "3.x",
+    "jquery": "2.x"
   },
   "devDependencies": {
     "angular-mocks": ">=1.3||<1.5",

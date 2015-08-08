@@ -2,7 +2,7 @@
     "compilerOptions": {
         "noImplicitAny": true,
         "target": "ES5",
-        "module": "umd",
+        "module": "commonjs",
         "removeComments": false
     },
     "files": [

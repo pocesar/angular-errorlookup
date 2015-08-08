@@ -5,9 +5,11 @@ module.exports = function (config){
     frameworks    : ['mocha'],
 
     files         : [
+      'bower_components/chai/chai.js',
+      'bower_components/jquery/dist/jquery.js',
+      'bower_components/lodash/lodash.js',
       'bower_components/angular/angular.js',
       'bower_components/angular-mocks/angular-mocks.js',
-      'bower_components/chai/index.js',
       'angular-errorlookup.js',
       'test/test.js'
     ],

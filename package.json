@@ -1,11 +1,9 @@
 {
   "name":"angular-errorlookup",
-  "version":"0.1.0",
+  "version":"0.1.1",
   "description": "Because AngularJS general error messages still suck. ngMessages can kiss my ass.",
   "main": "./angular-lookup.js",
-  "engines":{
-    "node":">=0.10.0"
-  },
+  "license": "MIT",
   "repository":{
     "type":"git",
     "url":"https://github.com/pocesar/angular-errorlookup"
@@ -13,13 +11,16 @@
   "dependencies":{},
   "devDependencies":{
     "karma":"0.13.x",
+    "mocha": "*",
     "karma-firefox-launcher":"*",
     "karma-mocha":"*",
-    "karma-spec-reporter":"*"
+    "karma-spec-reporter":"*",
+    "browserify": "11.x",
+    "tsify": "0.x"
   },
   "scripts":{
-    "test": "node ./node_modules/karma/bin/karma start ./test/karma.conf.js",
-    "build": "",
+    "test": "karma start ./test/karma.conf.js",
+    "build": "browserify angular-errorlookup.ts -p [ tsify ] > angular-errorlookup.js",
     "dorelease": "npm publish ."
   }
 }
