@@ -11,14 +11,32 @@ module.exports = function (config){
       'bower_components/angular/angular.js',
       'bower_components/angular-mocks/angular-mocks.js',
       'angular-errorlookup.js',
-      'test/test.js'
+      'test/*.test.js'
     ],
 
     exclude       : [],
 
     proxies       : {},
 
-    reporters     : ['spec'],
+    reporters     : ['spec','coverage'],
+
+    preprocessors: {
+      'angular-errorlookup.js': ['coverage']
+    },
+
+    coverageReporter: {
+      reporters: [
+        { type: 'html', dir:'coverage/' },
+        { type: 'lcovonly', dir:'coverage/', subdir: '.', file: 'lcov.info' }
+      ]
+    },
+
+    client: {
+      captureConsole: true,
+      mocha: {
+        ui: 'bdd'
+      }
+    },
 
     port          : 9876,
 
@@ -32,6 +50,6 @@ module.exports = function (config){
 
     captureTimeout: 60000,
 
-    singleRun     : true
+    singleRun     : false
   });
 };
