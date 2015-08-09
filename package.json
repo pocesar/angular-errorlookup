@@ -9,6 +9,19 @@
     "url":"https://github.com/pocesar/angular-errorlookup"
   },
   "dependencies":{},
+  "keywords": [
+      "ngMessage",
+      "angular",
+      "angularjs",
+      "error",
+      "handling",
+      "service",
+      "provider",
+      "directive",
+      "ngModel",
+      "input",
+      "form"
+  ],
   "devDependencies":{
     "karma":"0.13.x",
     "mocha": "*",
