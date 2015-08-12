@@ -179,14 +179,14 @@ var Services;
             var fromModel = function (model, key) {
                 if (key) {
                     var ngModel = model;
-                    if (ngModel.controller && typeof ngModel.controller[key] !== 'undefined') {
+                    if (ngModel && ngModel.controller && typeof ngModel.controller[key] !== 'undefined') {
                         return ngModel.controller[key];
                     }
                     if (typeof ngModel[key] !== 'undefined') {
                         return ngModel[key];
                     }
                 }
-                else {
+                else if (model) {
                     if (model.controller) {
                         return model.controller;
                     }
@@ -194,6 +194,7 @@ var Services;
                         return model;
                     }
                 }
+                return '';
             };
             var findName = function (e, retName) {
                 if (retName === void 0) { retName = true; }
