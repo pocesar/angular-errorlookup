@@ -1,5 +1,3 @@
-/// <reference path="typings/tsd.d.ts" />
-
 'use strict';
 
 export interface IFilterFunction {
@@ -253,19 +251,20 @@ export module Services {
             var fromModel = (model: IErrorModel, key?: string): any => {
                 if (key) {
                     var ngModel: any = model;
-                    if (ngModel.controller && typeof ngModel.controller[key] !== 'undefined') {
+                    if (ngModel && ngModel.controller && typeof ngModel.controller[key] !== 'undefined') {
                         return ngModel.controller[key];
                     }
                     if (typeof ngModel[key] !== 'undefined') {
                         return ngModel[key];
                     }
-                } else {
+                } else if (model) {
                     if (model.controller) {
                         return model.controller;
                     } else {
                         return model;
                     }
                 }
+                return '';
             };
 
             var findName = (e: IErrorModel, retName: boolean = true): string => {
