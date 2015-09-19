@@ -179,11 +179,13 @@ var Services;
             var fromModel = function (model, key) {
                 if (key) {
                     var ngModel = model;
-                    if (ngModel && ngModel.controller && typeof ngModel.controller[key] !== 'undefined') {
-                        return ngModel.controller[key];
-                    }
-                    if (typeof ngModel[key] !== 'undefined') {
-                        return ngModel[key];
+                    if (ngModel) {
+                        if (ngModel.controller && typeof ngModel.controller[key] !== 'undefined') {
+                            return ngModel.controller[key];
+                        }
+                        if (typeof ngModel[key] !== 'undefined') {
+                            return ngModel[key];
+                        }
                     }
                 }
                 else if (model) {
@@ -316,6 +318,9 @@ var Services;
                         _.forEach(error, function (e) {
                             var obj, label;
                             e = modelByDefinition(e);
+                            if (!e) {
+                                return;
+                            }
                             if (_.indexOf(already, e) !== -1) {
                                 return;
                             }
@@ -479,7 +484,7 @@ var Services;
                         errors = model.helpers.error();
                     }
                     else {
-                        throw new ErrorLookupError("Model \"" + name + "\" not found in \"" + group + "\"");
+                        return this.$q.reject(new ErrorLookupError("Model \"" + name + "\" not found in \"" + group + "\""));
                     }
                 }
                 else {
@@ -489,12 +494,14 @@ var Services;
                 }
             }
             else {
-                throw new ErrorLookupError("Group \"" + group + "\" is undefined");
+                return this.$q.reject(new ErrorLookupError("Group \"" + group + "\" is undefined"));
             }
             return this.$q.when(errors);
         };
+        /**
+         * Forcefully set an error on the model, but don't change the ngModel.$error object
+         */
         ErrorLookup.prototype.set = function (group, name, errors, reset) {
-            if (errors === void 0) { errors = {}; }
             if (reset === void 0) { reset = true; }
             var model;
             var _errors = [];
@@ -517,11 +524,11 @@ var Services;
                     _errors = model.helpers.error();
                 }
                 else {
-                    throw new ErrorLookupError("Model \"" + model + "\" not found in group \"" + group + "\"");
+                    return this.$q.reject(new ErrorLookupError("Model \"" + model + "\" not found in group \"" + group + "\""));
                 }
             }
             else {
-                throw new ErrorLookupError("Group \"" + group + "\" is undefined");
+                return this.$q.reject(new ErrorLookupError("Group \"" + group + "\" is undefined"));
             }
             return this.$q.when(_errors);
         };
@@ -555,7 +562,6 @@ var Services;
                         return self.reset(group, name, pick);
                     },
                     validity: function (validity) {
-                        if (validity === void 0) { validity = {}; }
                         return self.validity(group, name, validity);
                     },
                     remove: function () {
@@ -938,17 +944,19 @@ var Directives;
                         }
                         else {
                             scope.$displaying = function () {
-                                return scope.$parent.$eval(attr['errorLookupShow'], {
+                                var ret = scope.$parent.$eval(attr['errorLookupShow'], {
                                     $model: model.item.controller,
                                     $error: model.error,
+                                    $errors: model.item.errors,
                                     $attrs: attr,
                                     $value: model.item.controller.$viewValue,
                                     $name: model.item.name,
                                     $scope: scope
                                 });
+                                return ret;
                             };
                         }
-                        var unwatch = scope.$parent.$watch(function () {
+                        var unwatch = scope.$parent.$watchCollection(function () {
                             return _.map(error(), function (i) { return i.message; });
                         }, function (e, o) {
                             scope.$errorCount = e.length;
@@ -960,7 +968,7 @@ var Directives;
                                 scope.$latest = void 0;
                                 scope.$first = void 0;
                             }
-                        }, true);
+                        });
                         scope.$on('$destroy', function () {
                             unwatch();
                             scope.$model = null;
