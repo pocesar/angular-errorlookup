@@ -64,10 +64,10 @@ export interface IInterpolatedMessages<T> {
 export interface IErrorHelper {
     item: IErrorModel;
     error: IErrorGetterSetter;
-    set(err: any): angular.IPromise<IErrorMessage[]>;
+    set(err: IList<boolean>): angular.IPromise<IErrorMessage[]>;
     label(item: string, name: string): IErrorHelper;
     reset(pick?: any): angular.IPromise<IErrorMessage[]>;
-    validity(validity?: any): angular.IPromise<IErrorMessage[]>;
+    validity(validity: IList<boolean>): angular.IPromise<IErrorMessage[]>;
     remove(): angular.IPromise<void>;
     validate(): boolean;
 }
@@ -253,11 +253,13 @@ export module Services {
             var fromModel = (model: IErrorModel, key?: string): any => {
                 if (key) {
                     var ngModel: any = model;
-                    if (ngModel && ngModel.controller && typeof ngModel.controller[key] !== 'undefined') {
-                        return ngModel.controller[key];
-                    }
-                    if (typeof ngModel[key] !== 'undefined') {
-                        return ngModel[key];
+                    if (ngModel) {
+                        if (ngModel.controller && typeof ngModel.controller[key] !== 'undefined') {
+                            return ngModel.controller[key];
+                        }
+                        if (typeof ngModel[key] !== 'undefined') {
+                            return ngModel[key];
+                        }
                     }
                 } else if (model) {
                     if (model.controller) {
@@ -409,6 +411,10 @@ export module Services {
                                 label: string;
 
                             e = modelByDefinition(e);
+
+                            if (!e) {
+                                return;
+                            }
 
                             if (_.indexOf(already, e) !== -1) {
                                 return;
@@ -607,7 +613,7 @@ export module Services {
                         }
                         errors = model.helpers.error();
                     } else {
-                        throw new ErrorLookupError(`Model "${name}" not found in "${group}"`);
+                        return this.$q.reject(new ErrorLookupError(`Model "${name}" not found in "${group}"`));
                     }
                 } else {
                     _.forEach(this.repository[group].models, (value, k) => {
@@ -615,7 +621,7 @@ export module Services {
                     });
                 }
             } else {
-                throw new ErrorLookupError(`Group "${group}" is undefined`);
+                return this.$q.reject(new ErrorLookupError(`Group "${group}" is undefined`));
             }
 
             return this.$q.when(errors);
@@ -624,10 +630,7 @@ export module Services {
         /**
          * Forcefully set an error on the model, but don't change the ngModel.$error object
          */
-        set(group: string, name: string, errors : IList<Function>, reset?: boolean): angular.IPromise<IErrorMessage[]>;
-        set(group: string, name: string, errors : IList<string>, reset?: boolean): angular.IPromise<IErrorMessage[]>;
-        set(group: string, name: string, errors : IList<boolean>, reset?: boolean): angular.IPromise<IErrorMessage[]>;
-        set(group: string, name: any, errors : any = {}, reset: boolean = true): angular.IPromise<IErrorMessage[]> {
+        set(group: string, name: string, errors : IList<Function|string|boolean>, reset: boolean = true): angular.IPromise<IErrorMessage[]> {
             var model: IErrorModel;
             var _errors: IErrorMessage[] = [];
             var g = this.repository[group];
@@ -641,7 +644,7 @@ export module Services {
                         this.reset(group, name);
                     }
 
-                    _.forEach<any, string>(errors, (v, k) => {
+                    _.forEach(errors, (v, k) => {
                         model.forced[k] = v;
                         model.state.reset[k] = true;
                     });
@@ -655,10 +658,10 @@ export module Services {
                     model.state.manual = true;
                     _errors = model.helpers.error();
                 } else {
-                    throw new ErrorLookupError(`Model "${model}" not found in group "${group}"`);
+                    return this.$q.reject(new ErrorLookupError(`Model "${model}" not found in group "${group}"`));
                 }
             } else {
-                throw new ErrorLookupError(`Group "${group}" is undefined`);
+                return this.$q.reject(new ErrorLookupError(`Group "${group}" is undefined`));
             }
 
             return this.$q.when(_errors);
@@ -696,7 +699,7 @@ export module Services {
                     reset: function(pick: string[]) {
                         return self.reset(group, name, pick);
                     },
-                    validity: function(validity : any = {}) {
+                    validity: function(validity: IList<boolean>) {
                         return self.validity(group, name, validity);
                     },
                     remove: function() {
@@ -1254,18 +1257,20 @@ module Directives {
                             };
                         } else {
                             scope.$displaying = () => {
-                                return scope.$parent.$eval(attr['errorLookupShow'], {
+                                var ret = scope.$parent.$eval(attr['errorLookupShow'], {
                                     $model: model.item.controller,
                                     $error: model.error,
+                                    $errors: model.item.errors,
                                     $attrs: attr,
                                     $value: model.item.controller.$viewValue,
                                     $name: model.item.name,
                                     $scope: scope
                                 });
+                                return ret;
                             };
                         }
 
-                        var unwatch = scope.$parent.$watch(
+                        var unwatch = scope.$parent.$watchCollection(
                             () => {
                                 return _.map(error(), (i) => i.message);
                             },
@@ -1278,8 +1283,7 @@ module Directives {
                                     scope.$latest = void 0;
                                     scope.$first = void 0;
                                 }
-                            },
-                            true
+                            }
                         );
 
                         scope.$on('$destroy', () => {
