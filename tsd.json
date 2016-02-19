@@ -1,42 +1,27 @@
 {
-  "version": "v4",
-  "repo": "borisyankov/DefinitelyTyped",
-  "ref": "master",
-  "path": "typings",
-  "bundle": "typings/tsd.d.ts",
-  "installed": {
-    "angularjs/angular-mocks.d.ts": {
-      "commit": "284c2b8828f06bdde1f949a22ad174f5221d57f9"
-    },
-    "angularjs/angular-animate.d.ts": {
-      "commit": "284c2b8828f06bdde1f949a22ad174f5221d57f9"
-    },
-    "angularjs/angular-cookies.d.ts": {
-      "commit": "284c2b8828f06bdde1f949a22ad174f5221d57f9"
-    },
-    "angularjs/angular-sanitize.d.ts": {
-      "commit": "284c2b8828f06bdde1f949a22ad174f5221d57f9"
-    },
-    "angularjs/angular-resource.d.ts": {
-      "commit": "284c2b8828f06bdde1f949a22ad174f5221d57f9"
-    },
-    "angularjs/angular.d.ts": {
-      "commit": "284c2b8828f06bdde1f949a22ad174f5221d57f9"
-    },
-    "angularjs/angular-route.d.ts": {
-      "commit": "284c2b8828f06bdde1f949a22ad174f5221d57f9"
-    },
-    "angularjs/legacy/angular-scenario-1.2.d.ts": {
-      "commit": "284c2b8828f06bdde1f949a22ad174f5221d57f9"
-    },
-    "jquery/jquery.d.ts": {
-      "commit": "284c2b8828f06bdde1f949a22ad174f5221d57f9"
-    },
-    "lodash/lodash.d.ts": {
-      "commit": "284c2b8828f06bdde1f949a22ad174f5221d57f9"
-    },
-    "chai/chai.d.ts": {
-      "commit": "8de599097a8acb3c246f9cc152f07b323c5a8b49"
+    "version": "v4",
+    "repo": "borisyankov/DefinitelyTyped",
+    "ref": "master",
+    "path": "typings",
+    "bundle": "typings/tsd.d.ts",
+    "installed": {
+        "angularjs/angular-mocks.d.ts": {
+            "commit": "24c1fbefac6201f31e3fa1e2537e09d99ccdaf69"
+        },
+        "angularjs/angular-sanitize.d.ts": {
+            "commit": "24c1fbefac6201f31e3fa1e2537e09d99ccdaf69"
+        },
+        "angularjs/angular.d.ts": {
+            "commit": "24c1fbefac6201f31e3fa1e2537e09d99ccdaf69"
+        },
+        "jquery/jquery.d.ts": {
+            "commit": "24c1fbefac6201f31e3fa1e2537e09d99ccdaf69"
+        },
+        "lodash/lodash.d.ts": {
+            "commit": "24c1fbefac6201f31e3fa1e2537e09d99ccdaf69"
+        },
+        "chai/chai.d.ts": {
+            "commit": "24c1fbefac6201f31e3fa1e2537e09d99ccdaf69"
+        }
     }
-  }
 }

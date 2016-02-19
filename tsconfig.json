@@ -1,12 +1,16 @@
 {
     "compilerOptions": {
         "noImplicitAny": true,
-        "target": "ES5",
-        "module": "commonjs",
-        "removeComments": false
+        "target": "es5",
+        "module": "umd",
+        "removeComments": false,
+        "outDir": ".",
+        "declaration": true
     },
-    "files": [
-        "typings/tsd.d.ts",
-        "angular-errorlookup.ts"
+    "exclude": [
+        "bower_components",
+        "coverage",
+        "node_modules",
+        "test"
     ]
 }

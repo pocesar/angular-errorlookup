@@ -1,5 +1,3 @@
-/// <reference path="typings/tsd.d.ts" />
-
 'use strict';
 
 export interface IFilterFunction {
@@ -64,10 +62,10 @@ export interface IInterpolatedMessages<T> {
 export interface IErrorHelper {
     item: IErrorModel;
     error: IErrorGetterSetter;
-    set(err: IList<boolean>): angular.IPromise<IErrorMessage[]>;
+    set(err: any): angular.IPromise<IErrorMessage[]>;
     label(item: string, name: string): IErrorHelper;
     reset(pick?: any): angular.IPromise<IErrorMessage[]>;
-    validity(validity: IList<boolean>): angular.IPromise<IErrorMessage[]>;
+    validity(validity?: any): angular.IPromise<IErrorMessage[]>;
     remove(): angular.IPromise<void>;
     validate(): boolean;
 }
@@ -173,7 +171,7 @@ function empty(obj: any, member: string, filter?: Function, del: boolean = false
             if (_.isArray(obj[member])) {
                 obj[member].length = 0;
             } else if (_.isPlainObject(obj[member])) {
-                _.forEach(obj[member], (v, k) => {
+                _.forIn(obj[member], (v, k) => {
                     if (filter && filter(v,k)) {
                         delete obj[member][k];
                     } else {
@@ -185,7 +183,7 @@ function empty(obj: any, member: string, filter?: Function, del: boolean = false
     }
 }
 
-export module Services {
+export namespace Services {
 
     export class ErrorLookup {
         repository: IList<IErrorModels> = {};
@@ -213,7 +211,7 @@ export module Services {
                 }
             } else if (_.isPlainObject(message)) {
                 var out: any = {};
-                _.forEach(message, (str, key) => {
+                _.forIn(message, (str, key) => {
                     out[key] = this.translate(key);
                 });
                 return out;
@@ -609,7 +607,7 @@ export module Services {
                         if (pick.length === 0) {
                             empty(model, 'forced');
                         } else {
-                            empty(model, 'forced', (value: any, k: any) => _.contains(pick, k));
+                            empty(model, 'forced', (value: any, k: any) => _.includes(pick, k));
                         }
                         errors = model.helpers.error();
                     } else {
@@ -630,7 +628,10 @@ export module Services {
         /**
          * Forcefully set an error on the model, but don't change the ngModel.$error object
          */
-        set(group: string, name: string, errors : IList<Function|string|boolean>, reset: boolean = true): angular.IPromise<IErrorMessage[]> {
+        set(group: string, name: string, errors : IList<Function>, reset?: boolean): angular.IPromise<IErrorMessage[]>;
+        set(group: string, name: string, errors : IList<string>, reset?: boolean): angular.IPromise<IErrorMessage[]>;
+        set(group: string, name: string, errors : IList<boolean>, reset?: boolean): angular.IPromise<IErrorMessage[]>;
+        set(group: string, name: any, errors : any = {}, reset: boolean = true): angular.IPromise<IErrorMessage[]> {
             var model: IErrorModel;
             var _errors: IErrorMessage[] = [];
             var g = this.repository[group];
@@ -644,7 +645,7 @@ export module Services {
                         this.reset(group, name);
                     }
 
-                    _.forEach(errors, (v, k) => {
+                    _.forIn(errors, (v, k) => {
                         model.forced[k] = v;
                         model.state.reset[k] = true;
                     });
@@ -699,7 +700,7 @@ export module Services {
                     reset: function(pick: string[]) {
                         return self.reset(group, name, pick);
                     },
-                    validity: function(validity: IList<boolean>) {
+                    validity: function(validity : any = {}) {
                         return self.validity(group, name, validity);
                     },
                     remove: function() {
@@ -724,7 +725,7 @@ export module Services {
         label (group: string, item: string, label: string): ErrorLookup;
         label (group: string, item: any, label: string = ''): ErrorLookup {
             if (_.isPlainObject(item)) {
-                _.forEach(item, (label: string, key: string) => {
+                _.forIn(item, (label: string, key: string) => {
                     this.repository[group].labels[key] = label;
                 });
             } else if (_.isString(item)) {
@@ -921,7 +922,7 @@ export module Services {
                     return $http.get(url, {
                         cache: true
                     }).then((m) => {
-                        _.forEach(m.data, (msg, key) => {
+                        _.forEach(m.data, (msg: any, key: string) => {
                             this.messages.add(key, msg);
                         });
 
@@ -950,7 +951,7 @@ export module Services {
     }
 }
 
-export module Providers {
+export namespace Providers {
 
     export class ErrorLookupProvider {
 
@@ -975,7 +976,7 @@ export module Providers {
         add(name: string, expr: any): ErrorLookupProvider;
         add(name: any, expr?: any): ErrorLookupProvider {
             if (_.isPlainObject(name)) {
-                _.forEach(name, (m, k) => {
+                _.forEach(name, (m: any, k: string) => {
                     this.add(k, m);
                 });
             } else {
@@ -1014,7 +1015,7 @@ export interface IErrorLookupFormController {
     deferreds?: Function[];
 }
 
-module Directives {
+namespace Directives {
 
     class ErrorLookupForm implements angular.IDirective {
         restrict = 'A';
@@ -1342,7 +1343,7 @@ module Directives {
     export var errorLookupTemplate: angular.IDirective = ErrorLookupTemplate.instance();
 }
 
-module Filters {
+namespace Filters {
 
     class ErrorMessages {
         static filter(item:IErrorMessage[], options?: IErrorFilterOptions): string[];
@@ -1387,7 +1388,7 @@ module Filters {
             if (item && item.length) {
                 return _<IErrorMessage>(item).filter((i) => {
                     return i && i.message && filterFn(i.type) && limit-- > 0;
-                }).map((i) => i.message).valueOf();
+                }).map((i) => i.message).value();
             } else if (item && item.message) {
                 if (item.type) {
                     if (filterFn(item.type)) {

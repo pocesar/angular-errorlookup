@@ -1,26 +1,39 @@
 {
-  "name": "angular-errorlookup",
-  "version": "0.2.2",
-  "description": "Because AngularJS general error messages still suck. ngMessages can kiss my ass.",
-  "main": "./angular-lookup.js",
-  "ignore": [
-    "**/.*",
-    "node_modules",
-    "bower_components",
-    "coverage",
-    "test",
-    "typings",
-    "tsconfig.json",
-    ".travis.yml",
-    "tsd.json"
-  ],
-  "dependencies": {
-    "angular": ">=1.3 <1.5",
-    "lodash": "3.x",
-    "jquery": "2.x"
-  },
-  "devDependencies": {
-    "angular-mocks": ">=1.3 <1.5",
-    "chai":"*"
-  }
+    "name": "angular-errorlookup",
+    "description": "Because AngularJS general error messages still suck. ngMessages can kiss my ass.",
+    "main": "./angular-lookup.js",
+    "ignore": [
+        "**/.*",
+        "node_modules",
+        "bower_components",
+        "coverage",
+        "test",
+        "typings",
+        "tsconfig.json",
+        ".travis.yml",
+        "tsd.json"
+    ],
+    "keywords": [
+        "ngMessage",
+        "ngMessages",
+        "angular",
+        "angularjs",
+        "error",
+        "handling",
+        "service",
+        "provider",
+        "directive",
+        "ngModel",
+        "input",
+        "form"
+    ],
+    "dependencies": {
+        "angular": ">=1.3 <2",
+        "lodash": "^4.5.0",
+        "jquery": "^2.2.0"
+    },
+    "devDependencies": {
+        "angular-mocks": ">=1.3 <2",
+        "chai": "*"
+    }
 }

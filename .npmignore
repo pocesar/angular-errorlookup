@@ -1,0 +1,9 @@
+test
+typings
+.travis.yml
+tsconfig.json
+tsd.json
+angular-errorlookup.ts
+coverage
+bower_components
+node_modules
