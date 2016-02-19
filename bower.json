@@ -1,7 +1,7 @@
 {
     "name": "angular-errorlookup",
     "description": "Because AngularJS general error messages still suck. ngMessages can kiss my ass.",
-    "main": "./angular-lookup.js",
+    "main": "./angular-errorlookup.js",
     "ignore": [
         "**/.*",
         "node_modules",

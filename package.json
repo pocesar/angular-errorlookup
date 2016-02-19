@@ -23,8 +23,8 @@
         "input",
         "form"
     ],
-    "browser":"./angular-lookup.js",
-    "typings":"./angular-lookup.d.ts",
+    "browser":"./angular-errorlookup.js",
+    "typings":"./angular-errorlookup.d.ts",
     "devDependencies": {
         "coveralls": "^2.11.6",
         "karma": "^0.13.21",
