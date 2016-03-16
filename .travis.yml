@@ -11,4 +11,4 @@ before_script:
 
 script: npm run travis
 
-after_success: NODE_ENV=test cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage
+after_success: NODE_ENV=test cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js

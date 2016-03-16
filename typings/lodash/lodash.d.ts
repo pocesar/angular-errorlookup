@@ -7997,11 +7997,17 @@ declare module _ {
             thisArg?: any
         ): TResult[];
 
+        map<T extends {}, TResult>(
+            collection: NumericDictionary<T>,
+            iteratee?: NumericDictionaryIterator<T, TResult>,
+            thisArg?: any
+        ): TResult[];
+
         /**
          * @see _.map
          */
         map<T, TResult>(
-            collection: List<T>|Dictionary<T>,
+            collection: List<T>|Dictionary<T>|NumericDictionary<T>,
             iteratee?: string
         ): TResult[];
 
@@ -8009,7 +8015,7 @@ declare module _ {
          * @see _.map
          */
         map<T, TObject extends {}>(
-            collection: List<T>|Dictionary<T>,
+            collection: List<T>|Dictionary<T>|NumericDictionary<T>,
             iteratee?: TObject
         ): boolean[];
     }
@@ -8300,6 +8306,15 @@ declare module _ {
         * @see _.reduce
         **/
         reduce<T, TResult>(
+            collection: NumericDictionary<T>,
+            callback: MemoIterator<T, TResult>,
+            accumulator: TResult,
+            thisArg?: any): TResult;
+
+        /**
+        * @see _.reduce
+        **/
+        reduce<T, TResult>(
             collection: Array<T>,
             callback: MemoIterator<T, TResult>,
             thisArg?: any): TResult;
@@ -8317,6 +8332,14 @@ declare module _ {
         **/
         reduce<T, TResult>(
             collection: Dictionary<T>,
+            callback: MemoIterator<T, TResult>,
+            thisArg?: any): TResult;
+
+        /**
+        * @see _.reduce
+        **/
+        reduce<T, TResult>(
+            collection: NumericDictionary<T>,
             callback: MemoIterator<T, TResult>,
             thisArg?: any): TResult;
 
@@ -10596,6 +10619,59 @@ declare module _ {
      * Lang *
      ********/
 
+    //_.castArray
+    interface LoDashStatic {
+        /**
+         * Casts value as an array if it’s not one.
+         *
+         * @param value The value to inspect.
+         * @return Returns the cast array.
+         */
+        castArray<T>(value: T): T[];
+    }
+
+    interface LoDashImplicitWrapper<T> {
+        /**
+         * @see _.castArray
+         */
+        castArray(): LoDashImplicitArrayWrapper<T>;
+    }
+
+    interface LoDashImplicitArrayWrapper<T> {
+        /**
+         * @see _.castArray
+         */
+        castArray(): LoDashImplicitArrayWrapper<T>;
+    }
+
+    interface LoDashImplicitObjectWrapper<T> {
+        /**
+         * @see _.castArray
+         */
+        castArray(): LoDashImplicitArrayWrapper<T>;
+    }
+
+    interface LoDashExplicitWrapper<T> {
+        /**
+         * @see _.castArray
+         */
+        castArray(): LoDashExplicitArrayWrapper<T>;
+    }
+
+    interface LoDashExplicitArrayWrapper<T> {
+        /**
+         * @see _.castArray
+         */
+        castArray(): LoDashExplicitArrayWrapper<T>;
+    }
+
+    interface LoDashExplicitObjectWrapper<T> {
+        /**
+         * @see _.castArray
+         */
+        castArray(): LoDashExplicitArrayWrapper<T>;
+    }
+
     //_.clone
     interface LoDashStatic {
         /**
@@ -10946,6 +11022,31 @@ declare module _ {
         isArray(): LoDashExplicitWrapper<boolean>;
     }
 
+    //_.isArrayBuffer
+    interface LoDashStatic {
+        /**
+         * Checks if value is classified as an ArrayBuffer object.
+         *
+         * @param value The value to check.
+         * @return Returns true if value is correctly classified, else false.
+         */
+        isArrayBuffer(value?: any): value is ArrayBuffer;
+    }
+
+    interface LoDashImplicitWrapperBase<T, TWrapper> {
+        /**
+         * @see _.isArrayBuffer
+         */
+        isArrayBuffer(): boolean;
+    }
+
+    interface LoDashExplicitWrapperBase<T, TWrapper> {
+        /**
+         * @see _.isArrayBuffer
+         */
+        isArrayBuffer(): LoDashExplicitWrapper<boolean>;
+    }
+
     //_.isArrayLike
     interface LoDashStatic {
         /**
@@ -11056,6 +11157,31 @@ declare module _ {
          * @see _.isBoolean
          */
         isBoolean(): LoDashExplicitWrapper<boolean>;
+    }
+
+    //_.isBuffer
+    interface LoDashStatic {
+        /**
+         * Checks if value is a buffer.
+         *
+         * @param value The value to check.
+         * @return Returns true if value is a buffer, else false.
+         */
+        isBuffer(value?: any): boolean;
+    }
+
+    interface LoDashImplicitWrapperBase<T, TWrapper> {
+        /**
+         * @see _.isBuffer
+         */
+        isBuffer(): boolean;
+    }
+
+    interface LoDashExplicitWrapperBase<T, TWrapper> {
+        /**
+         * @see _.isBuffer
+         */
+        isBuffer(): LoDashExplicitWrapper<boolean>;
     }
 
     //_.isDate
@@ -11413,6 +11539,31 @@ declare module _ {
          * @see _.isLength
          */
         isLength(): LoDashExplicitWrapper<boolean>;
+    }
+
+    //_.isMap
+    interface LoDashStatic {
+        /**
+         * Checks if value is classified as a Map object.
+         *
+         * @param value The value to check.
+         * @returns Returns true if value is correctly classified, else false.
+         */
+        isMap<K, V>(value?: any): value is Map<K, V>;
+    }
+
+    interface LoDashImplicitWrapperBase<T, TWrapper> {
+        /**
+         * @see _.isMap
+         */
+        isMap(): boolean;
+    }
+
+    interface LoDashExplicitWrapperBase<T, TWrapper> {
+        /**
+         * @see _.isMap
+         */
+        isMap(): LoDashExplicitWrapper<boolean>;
     }
 
     //_.isMatch
@@ -14850,6 +15001,133 @@ declare module _ {
         invert<TResult extends {}>(multiValue?: boolean): LoDashExplicitObjectWrapper<TResult>;
     }
 
+    //_.inverBy
+    interface InvertByIterator<T> {
+        (value: T): any;
+    }
+
+    interface LoDashStatic {
+        /**
+         * This method is like _.invert except that the inverted object is generated from the results of running each
+         * element of object through iteratee. The corresponding inverted value of each inverted key is an array of
+         * keys responsible for generating the inverted value. The iteratee is invoked with one argument: (value).
+         *
+         * @param object The object to invert.
+         * @param interatee The iteratee invoked per element.
+         * @return Returns the new inverted object.
+         */
+        invertBy(
+            object: Object,
+            interatee?: InvertByIterator<any>|string
+        ): Dictionary<string[]>;
+
+        /**
+         * @see _.invertBy
+         */
+        invertBy<T>(
+            object: _.Dictionary<T>|_.NumericDictionary<T>,
+            interatee?: InvertByIterator<T>|string
+        ): Dictionary<string[]>;
+
+        /**
+         * @see _.invertBy
+         */
+        invertBy<W>(
+            object: Object,
+            interatee?: W
+        ): Dictionary<string[]>;
+
+        /**
+         * @see _.invertBy
+         */
+        invertBy<T, W>(
+            object: _.Dictionary<T>,
+            interatee?: W
+        ): Dictionary<string[]>;
+    }
+
+    interface LoDashImplicitWrapper<T> {
+        /**
+         * @see _.invertBy
+         */
+        invertBy(
+            interatee?: InvertByIterator<any>
+        ): LoDashImplicitObjectWrapper<Dictionary<string[]>>;
+    }
+
+    interface LoDashImplicitArrayWrapper<T> {
+        /**
+         * @see _.invertBy
+         */
+        invertBy(
+            interatee?: InvertByIterator<T>|string
+        ): LoDashImplicitObjectWrapper<Dictionary<string[]>>;
+
+        /**
+         * @see _.invertBy
+         */
+        invertBy<W>(
+            interatee?: W
+        ): LoDashImplicitObjectWrapper<Dictionary<string[]>>;
+    }
+
+    interface LoDashImplicitObjectWrapper<T> {
+        /**
+         * @see _.invertBy
+         */
+        invertBy(
+            interatee?: InvertByIterator<any>|string
+        ): LoDashImplicitObjectWrapper<Dictionary<string[]>>;
+
+        /**
+         * @see _.invertBy
+         */
+        invertBy<W>(
+            interatee?: W
+        ): LoDashImplicitObjectWrapper<Dictionary<string[]>>;
+    }
+
+    interface LoDashExplicitWrapper<T> {
+        /**
+         * @see _.invertBy
+         */
+        invertBy(
+            interatee?: InvertByIterator<any>
+        ): LoDashExplicitObjectWrapper<Dictionary<string[]>>;
+    }
+
+    interface LoDashExplicitArrayWrapper<T> {
+        /**
+         * @see _.invertBy
+         */
+        invertBy(
+            interatee?: InvertByIterator<T>|string
+        ): LoDashExplicitObjectWrapper<Dictionary<string[]>>;
+
+        /**
+         * @see _.invertBy
+         */
+        invertBy<W>(
+            interatee?: W
+        ): LoDashExplicitObjectWrapper<Dictionary<string[]>>;
+    }
+
+    interface LoDashExplicitObjectWrapper<T> {
+        /**
+         * @see _.invertBy
+         */
+        invertBy(
+            interatee?: InvertByIterator<any>|string
+        ): LoDashExplicitObjectWrapper<Dictionary<string[]>>;
+
+        /**
+         * @see _.invertBy
+         */
+        invertBy<W>(
+            interatee?: W
+        ): LoDashExplicitObjectWrapper<Dictionary<string[]>>;
+    }
+
     //_.keys
     interface LoDashStatic {
         /**
@@ -18006,3 +18284,6 @@ declare module _ {
 declare module "lodash" {
     export = _;
 }
+
+// Backward compatibility with --target es5
+interface Map<K, V> {}

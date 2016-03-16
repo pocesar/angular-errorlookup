@@ -6,22 +6,22 @@
     "bundle": "typings/tsd.d.ts",
     "installed": {
         "angularjs/angular-mocks.d.ts": {
-            "commit": "24c1fbefac6201f31e3fa1e2537e09d99ccdaf69"
+            "commit": "9f0f926a12026287b5a4a229e5672c01e7549313"
         },
         "angularjs/angular-sanitize.d.ts": {
-            "commit": "24c1fbefac6201f31e3fa1e2537e09d99ccdaf69"
+            "commit": "9f0f926a12026287b5a4a229e5672c01e7549313"
         },
         "angularjs/angular.d.ts": {
-            "commit": "24c1fbefac6201f31e3fa1e2537e09d99ccdaf69"
+            "commit": "9f0f926a12026287b5a4a229e5672c01e7549313"
         },
         "jquery/jquery.d.ts": {
-            "commit": "24c1fbefac6201f31e3fa1e2537e09d99ccdaf69"
+            "commit": "9f0f926a12026287b5a4a229e5672c01e7549313"
         },
         "lodash/lodash.d.ts": {
-            "commit": "24c1fbefac6201f31e3fa1e2537e09d99ccdaf69"
+            "commit": "9f0f926a12026287b5a4a229e5672c01e7549313"
         },
         "chai/chai.d.ts": {
-            "commit": "24c1fbefac6201f31e3fa1e2537e09d99ccdaf69"
+            "commit": "9f0f926a12026287b5a4a229e5672c01e7549313"
         }
     }
 }
