@@ -4,6 +4,8 @@
     }
     else if (typeof define === 'function' && define.amd) {
         define(["require", "exports", 'angular', 'lodash'], factory);
+    } else {
+        factory(function(n){ return ({'lodash':_,'angular':angular})[n]; }, {});
     }
 })(function (require, exports) {
     'use strict';

@@ -5,6 +5,7 @@
         "module": "umd",
         "removeComments": false,
         "outDir": ".",
+        "newLine": "LF",
         "declaration": true,
         "moduleResolution": "node"
     },
