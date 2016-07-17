@@ -5,12 +5,16 @@
         "module": "umd",
         "removeComments": false,
         "outDir": ".",
-        "declaration": true
+        "declaration": true,
+        "moduleResolution": "node"
     },
     "exclude": [
         "bower_components",
         "coverage",
         "node_modules",
         "test"
+    ],
+    "files": [
+        "angular-errorlookup.ts"
     ]
 }

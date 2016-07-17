@@ -1,3 +1,4 @@
+import * as angular from 'angular';
 export interface IFilterFunction {
     (type?: string): boolean;
 }

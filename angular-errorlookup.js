@@ -3,13 +3,12 @@
         var v = factory(require, exports); if (v !== undefined) module.exports = v;
     }
     else if (typeof define === 'function' && define.amd) {
-        define(["require", "exports"], factory);
-    }
-    else {
-        factory(void 0, {});
+        define(["require", "exports", 'angular', 'lodash'], factory);
     }
 })(function (require, exports) {
     'use strict';
+    var angular = require('angular');
+    var _ = require('lodash');
     var ErrorLookupError = (function () {
         function ErrorLookupError(message) {
             var error = Error.call(this, message);
@@ -18,7 +17,7 @@
             this.stack = error.stack;
         }
         return ErrorLookupError;
-    })();
+    }());
     exports.ErrorLookupError = ErrorLookupError;
     ErrorLookupError.prototype = Object.create(Error.prototype, {
         constructor: {
@@ -706,7 +705,7 @@
             };
             ErrorLookup.$inject = ['$interpolate', '$q', '$http', '$timeout'];
             return ErrorLookup;
-        })();
+        }());
         Services.ErrorLookup = ErrorLookup;
     })(Services = exports.Services || (exports.Services = {}));
     var Providers;
@@ -759,7 +758,7 @@
                 return [function () { return new _this; }];
             };
             return ErrorLookupProvider;
-        })();
+        }());
         Providers.ErrorLookupProvider = ErrorLookupProvider;
     })(Providers = exports.Providers || (exports.Providers = {}));
     var Directives;
@@ -853,7 +852,7 @@
                 ];
             };
             return ErrorLookupForm;
-        })();
+        }());
         Directives.errorLookupForm = ErrorLookupForm.instance();
         var ErrorLookup = (function () {
             function ErrorLookup(ErrorLookup) {
@@ -907,7 +906,7 @@
                 ];
             };
             return ErrorLookup;
-        })();
+        }());
         Directives.errorLookup = ErrorLookup.instance();
         var ErrorLookupDisplay = (function () {
             function ErrorLookupDisplay(ErrorLookup) {
@@ -1004,13 +1003,13 @@
                 ];
             };
             return ErrorLookupDisplay;
-        })();
+        }());
         Directives.errorLookupDisplay = ErrorLookupDisplay.instance();
         var ErrorLookupTemplate = (function () {
             function ErrorLookupTemplate() {
                 this.restrict = 'A';
                 this.require = 'errorLookupDisplay';
-                this.template = "<ul class=\"error-lookup-display\" ng-show=\"$displaying()\">\n                        <li class=\"error-lookup-display-item\" ng-repeat=\"error in $errors | errorMessages:$options track by $index\" ng-bind-html=\"error\"></li>\n                    </ul>";
+                this.template = "<ul class=\"error-lookup-display\" ng-show=\"$displaying()\">\n\t\t\t\t\t\t\t\t\t\t\t\t<li class=\"error-lookup-display-item\" ng-repeat=\"error in $errors | errorMessages:$options track by $index\" ng-bind-html=\"error\"></li>\n\t\t\t\t\t\t\t\t\t\t</ul>";
                 this.link = function (scope, el, attrs, ctrl) {
                     ctrl.setOptions(scope.$eval(attrs['errorLookupTemplate']));
                 };
@@ -1020,7 +1019,7 @@
                 return [function () { return new _this(); }];
             };
             return ErrorLookupTemplate;
-        })();
+        }());
         Directives.errorLookupTemplate = ErrorLookupTemplate.instance();
     })(Directives || (Directives = {}));
     var Filters;
@@ -1097,7 +1096,7 @@
                 return [function () { return _this.filter; }];
             };
             return ErrorMessages;
-        })();
+        }());
         Filters.errorMessages = ErrorMessages.instance();
     })(Filters || (Filters = {}));
     angular

@@ -1,44 +1,48 @@
 {
-    "name": "angular-errorlookup",
-    "version": "1.0.1",
-    "description": "Because AngularJS general error messages still suck. ngMessages can kiss my ass.",
-    "main": "./angular-errorlookup.js",
-    "license": "MIT",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/pocesar/angular-errorlookup"
-    },
-    "dependencies": {},
-    "keywords": [
-        "ngMessage",
-        "ngMessages",
-        "angular",
-        "angularjs",
-        "error",
-        "handling",
-        "service",
-        "provider",
-        "directive",
-        "ngModel",
-        "input",
-        "form"
-    ],
-    "browser":"./angular-errorlookup.js",
-    "typings":"./angular-errorlookup.d.ts",
-    "devDependencies": {
-        "coveralls": "^2.11.8",
-        "karma": "^0.13.21",
-        "mocha": "^2.4.5",
-        "sinon": "^1.17.3",
-        "karma-coverage": "^0.5.4",
-        "karma-phantomjs-launcher": "^1.0.0",
-        "phantomjs-prebuilt": "^2.1.4",
-        "karma-mocha": "^0.2.2",
-        "karma-spec-reporter": "^0.0.24"
-    },
-    "scripts": {
-        "travis": "karma start ./test/karma.conf.js --single-run --browsers PhantomJS",
-        "test": "karma start ./test/karma.conf.js",
-        "dorelease": "npm publish ."
-    }
+	"name": "angular-errorlookup",
+	"version": "2.0.0",
+	"description": "Because AngularJS general error messages still suck. ngMessages can kiss my ass.",
+	"main": "./angular-errorlookup.js",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/pocesar/angular-errorlookup"
+	},
+	"dependencies": {},
+	"keywords": [
+		"ngMessage",
+		"ngMessages",
+		"angular",
+		"angularjs",
+		"error",
+		"handling",
+		"service",
+		"provider",
+		"directive",
+		"ngModel",
+		"input",
+		"form"
+	],
+	"browser": "./angular-errorlookup.js",
+	"typings": "./angular-errorlookup.d.ts",
+	"devDependencies": {
+		"@types/angular": "^1.5.7",
+		"@types/chai": "^3.4.28",
+		"@types/lodash": "0.0.27",
+		"coveralls": "^2.11.8",
+		"karma": "^0.13.21",
+		"karma-coverage": "^0.5.4",
+		"karma-mocha": "^0.2.2",
+		"karma-phantomjs-launcher": "^1.0.0",
+		"karma-spec-reporter": "^0.0.24",
+		"mocha": "^2.4.5",
+		"phantomjs-prebuilt": "^2.1.4",
+		"sinon": "^1.17.3"
+	},
+	"scripts": {
+		"compile": "tsc -p tsconfig.json",
+		"travis": "karma start ./test/karma.conf.js --single-run --browsers PhantomJS",
+		"test": "karma start ./test/karma.conf.js",
+		"dorelease": "npm publish ."
+	}
 }
